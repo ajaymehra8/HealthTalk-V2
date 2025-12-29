@@ -1,11 +1,12 @@
 import React from "react";
-import { Avatar, Box, Tooltip,useToast } from "@chakra-ui/react";
+import { Avatar, Box, Tooltip, useToast } from "@chakra-ui/react";
 import { useAuthState } from "../context/AuthProvider";
-import { NavLink, useNavigate} from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import Logo from "./Logo/Logo";
 
 const Navbar = () => {
   const { user, setUser } = useAuthState();
-  const toast=useToast();
+  const toast = useToast();
   const navigate = useNavigate();
   const handleLogin = () => {
     navigate("/login");
@@ -13,38 +14,41 @@ const Navbar = () => {
   const handleLogOut = () => {
     localStorage.removeItem("userInfo");
     setUser(null);
-  toast({
-    title:"Log out successfully",
-    position:"top",
-    status: "success",
-    isClosable: true,
-    duration: 10000,
-  })
+    toast({
+      title: "Log out successfully",
+      position: "top",
+      status: "success",
+      isClosable: true,
+      duration: 10000,
+    });
     navigate("/");
   };
   return (
     <Box
       w={"100vw"}
-      boxShadow="0px 4px 8px black"
+      boxShadow="0px 4px 8px gray"
       display={"flex"}
       alignItems={"center"}
       justifyContent={"space-between"}
       bg={"white"}
-      p={"5px 20px"}
+      p={"10px 70px"}
       position={"fixed"}
       top={"0"}
       zIndex={"5"}
+      background={"#F5F7FA"}
     >
-      <h1
-        className="logo"
-        style={{ cursor: "pointer" }}
-        onClick={() => {
-          navigate("/");
-        }}
-      >
-        <span className="logo-span">H</span>ealth
-        <span className="logo-span">T</span>alk
-      </h1>
+      <Box display={"flex"} gap={20} alignItems={"center"}>
+        <Logo />
+
+        <ul className="navLinks">
+          <li className="navLink" onClick={handleLogin}>
+            <NavLink>Find Doctors</NavLink>
+          </li>
+          <li className="navLink" onClick={() => navigate("/signup")}>
+            <NavLink>Apply as Doctor</NavLink>
+          </li>
+        </ul>
+      </Box>
       <ul className="navLinks">
         {user && (
           <li className="navLink" onClick={handleLogOut}>
@@ -56,7 +60,7 @@ const Navbar = () => {
             <li className="navLink" onClick={handleLogin}>
               <NavLink>Login</NavLink>
             </li>
-            <li className="navLink" onClick={() => navigate("/signup")}>
+            <li className="mainButton" onClick={() => navigate("/signup")}>
               <NavLink>Signup</NavLink>
             </li>
           </>

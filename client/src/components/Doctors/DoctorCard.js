@@ -5,76 +5,134 @@ import {
   CardFooter,
   Image,
   Stack,
-  Heading,
-  Button,
   Box,
+  useToast,
 } from "@chakra-ui/react";
 import { HStack } from "@chakra-ui/react";
-
+import Typography from "../ui/Typography";
 import { useNavigate } from "react-router-dom";
+import { useAuthState } from "../../context/AuthProvider";
+import axios from "axios";
 
 const DoctorCard = ({ doctor, handleFunction }) => {
   const navigate = useNavigate();
-  const [loading,setLoading]=useState(false);
+  const [loading, setLoading] = useState(false);
+  const [bookLoading, setBookLoading] = useState(false);
+  const { user } = useAuthState();
+
+  const toast = useToast();
+
   const handleViewProfile = async () => {
     setLoading(true);
     const doctorProf = await handleFunction(); // Assume this function fetches the doctor's profile data
     setLoading(false);
     navigate("/doctor-profile", { state: { user: doctorProf } }); // Pass the profile data using `state`
   };
+
+  const bookAppoinment = async (e) => {
+    e.stopPropagation();
+    if (!user) {
+      return toast({
+        title: "You are not logged in",
+        status: "error",
+        isClosable: true,
+        duration: 5000,
+        position: "top",
+      });
+    }
+    const body = {
+      doctor,
+    };
+    const token = user?.jwt;
+    setBookLoading(true);
+    const headers = {
+      "Content-Type": "application/json",
+      authorization: `Bearer ${token}`,
+    };
+
+    const { data } = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/v1/booking/create-booking`,
+      body,
+      { headers }
+    );
+    if (data.success) {
+      toast({
+        title: data.message,
+        status: "success",
+        isClosable: true,
+        duration: 5000,
+        position: "top",
+      });
+    }
+    setBookLoading(false);
+  };
+
   return (
-    <Card maxW="290px" cursor={"pointer"}>
-      <CardBody>
+    <Card
+      maxW="290px"
+      minW="290px"
+      cursor={"pointer"}
+      boxShadow={"0 2px 5px rgba(0, 0, 0, 0.08)"}
+      _hover={{
+        transform: "translateY(-6px)",
+        boxShadow: "0 16px 40px rgba(0, 0, 0, 0.08)",
+        transition: "all 0.25s ease",
+      }}
+      borderRadius={"10px"}
+      onClick={handleViewProfile}
+    >
+      <CardBody padding={"10px 10px 0 10px"}>
         <Image
           src={doctor?.image}
           alt="Doctor image"
-          borderRadius="lg"
-          w={['100%', '100%', '100%']}
-          h={['250px', '250px', '200px']}
-
+          borderRadius="10px"
+          w={["100%", "100%", "100%"]}
+          h={["200px", "200px", "200px"]}
         />
-        <Stack mt="3" spacing=".2">
-          <Heading size="md">Dr. {doctor?.name}</Heading>
+        <Stack mt="3" spacing="1">
+          <Typography variant="regular" weight="semibold">
+            Dr. {doctor?.name}
+          </Typography>
 
-          <div
+          <Typography
+            variant="small"
+            weight="medium"
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "start",
-              gap:"3%",
-              width: "100%",
-              padding: "10px 0",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "100%",
             }}
           >
-            <p>
-              $ <b>{doctor?.clinicFee ? doctor?.clinicFee : "2,000"}</b> at clinic
-            </p>
-           
-          </div>
-          <p style={{ fontSize: "17px", fontWeight: "500" }}>
+            {doctor?.specialization} . {doctor?.experience} years experience
+          </Typography>
+
+          <Typography
+            weight="medium"
+            variant="small"
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "100%",
+            }}
+          >
             <i class="bi bi-geo-alt"></i>{" "}
-            {doctor?.clinicLocation ? doctor?.clinicLocation?.name : "Delhi, India"}
-          </p>
+            {doctor?.clinicLocation
+              ? doctor?.clinicLocation?.name
+              : "Delhi, India"}
+          </Typography>
         </Stack>
-      </CardBody>
-      <CardFooter mt={"-10px"}>
-        <Box display={"flex"} justifyContent={"space-between"} width={"100%"}>
-          <Button
-            variant="solid"
-            background={!loading?"#78be20":"gray"}
-            color={"white"}
-            w={"clamp(100px,20%,200px)"}
-            onClick={!loading?handleViewProfile:undefined}
-            disabled={loading}
-            cursor={loading&&"not-allowed"}
-            letterSpacing={"1px"}
-            _hover={{
-              background: !loading&&"green",
-              color: !loading&&"white",
-            }}
-          >
-            {!loading?"View":"Wait..."}
-          </Button>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            height: "fit",
+            marginTop: "5px",
+          }}
+        >
           <HStack spacing={1}>
             {[1, 2, 3, 4, 5].map((index) => (
               <Box key={index} as="button">
@@ -87,10 +145,55 @@ const DoctorCard = ({ doctor, handleFunction }) => {
               </Box>
             ))}
           </HStack>
+          <Typography variant="small" weight="medium">
+            <span
+              style={{
+                color: "var(--subheading-color)",
+                fontWeight: 700,
+              }}
+            >
+              {" "}
+              {doctor?.avgRating}
+            </span>{" "}
+            ({doctor?.nRating} reviews)
+          </Typography>
+        </div>
+
+        <div
+          style={{
+            width: "100%",
+            height: "1px",
+            margin: "10px 0",
+            background: "#475569",
+          }}
+        />
+      </CardBody>
+
+      <CardFooter padding={"0 10px 15px"}>
+        <Box width={"100%"}>
+          <Typography
+            variant="regularVariant"
+            weight="medium"
+            style={{
+              marginBottom: "10px",
+              color: "#475569",
+            }}
+          >
+            Consultation fee:{" "}
+            <span style={{ fontWeight: 700 }}>$ {doctor?.clinicFee}</span>
+          </Typography>
+          <button
+            className="mainButton"
+            style={{
+              width: "100%",
+              fontWeight: "400",
+            }}
+            onClick={bookAppoinment}
+            disabled={bookLoading}
+          >
+            {!bookLoading ? "Book Appointment" : "Wait..."}
+          </button>
         </Box>
-        <p style={{ marginTop: "4px", fontSize: "20px", marginLeft: "5px" }}>
-          ({doctor?.nRating})
-        </p>
       </CardFooter>
     </Card>
   );

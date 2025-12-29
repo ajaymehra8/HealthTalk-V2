@@ -8,21 +8,24 @@ const Testimonial = () => {
       display={"flex"}
       alignItems={"center"}
       justifyContent={"space-evenly"}
-      p={"10px 0"}
+      paddingY={"var(--page-padding-y)"}
+      
       className="testimonials"
       sx={{
-        '@media (max-width: 900px)': {
-          flexDirection: 'column-reverse',
-          gap:"50px"
+        "@media (max-width: 900px)": {
+          flexDirection: "column-reverse",
+          gap: "50px",
         },
       }}
     >
-      <Box width={"42%"} sx={{
-        '@media (max-width: 900px)': {
-          width: "clamp(300px,90vw,900px)!important"
-
-        },
-      }}>
+      <Box
+        width={"42%"}
+        sx={{
+          "@media (max-width: 900px)": {
+            width: "clamp(300px,90vw,900px)!important",
+          },
+        }}
+      >
         <h1 style={{ fontSize: "25px", fontWeight: "700", lineHeight: "1" }}>
           Finest Client Care & Amenities Service
         </h1>
@@ -51,11 +54,12 @@ const Testimonial = () => {
                 value={80}
                 size="sm"
                 sx={{
-                    '& > div': {
-                      backgroundColor: '#78be20', // Custom hex color for the filled portion
-                    },
-                    backgroundColor: '#edf2f7', // Custom hex color for the track
-                  }}                  borderRadius="lg"
+                  "& > div": {
+                    backgroundColor: "#78be20", // Custom hex color for the filled portion
+                  },
+                  backgroundColor: "#edf2f7", // Custom hex color for the track
+                }}
+                borderRadius="lg"
                 width="100%"
               />
               <Text ml="4" fontWeight="bold">
@@ -73,11 +77,12 @@ const Testimonial = () => {
                 value={95}
                 size="sm"
                 sx={{
-                    '& > div': {
-                      backgroundColor: '#78be20', // Custom hex color for the filled portion
-                    },
-                    backgroundColor: '#edf2f7', // Custom hex color for the track
-                  }}                  borderRadius="lg"
+                  "& > div": {
+                    backgroundColor: "#78be20", // Custom hex color for the filled portion
+                  },
+                  backgroundColor: "#edf2f7", // Custom hex color for the track
+                }}
+                borderRadius="lg"
                 width="100%"
               />
               <Text ml="4" fontWeight="bold">
@@ -95,11 +100,12 @@ const Testimonial = () => {
                 value={70}
                 size="sm"
                 sx={{
-                    '& > div': {
-                      backgroundColor: '#78be20', // Custom hex color for the filled portion
-                    },
-                    backgroundColor: '#edf2f7', // Custom hex color for the track
-                  }}                borderRadius="lg"
+                  "& > div": {
+                    backgroundColor: "#78be20", // Custom hex color for the filled portion
+                  },
+                  backgroundColor: "#edf2f7", // Custom hex color for the track
+                }}
+                borderRadius="lg"
                 width="100%"
               />
               <Text ml="4" fontWeight="bold">
@@ -110,7 +116,7 @@ const Testimonial = () => {
         </Stack>
       </Box>
       <img
-        style={{ width: "42%",borderRadius:'10px' }}
+        style={{ width: "42%", borderRadius: "10px" }}
         src="https://st4.depositphotos.com/8846918/40660/i/450/depositphotos_406604956-stock-photo-blood-pressure-meter-medical-equipment.jpg"
         alt=""
         className="testimonialImg"

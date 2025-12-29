@@ -1,11 +1,13 @@
-import React, { useEffect, useState,useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Box } from "@chakra-ui/react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import Doctors from "./Doctors";
-import Testimonial from "./Testimonial";
+import TopDoctors from "../components/HomePage/TopDoctors";
+import Testimonial from "../components/HomePage/Testimonial";
 import Footer from "../components/Footer";
-import { Link } from "react-scroll";
+import HeroSection from "../components/HomePage/HeroSection";
+import FAQ from "../components/HomePage/FAQ";
+import WebsiteReview from "../components/HomePage/WebsiteReview/WebsiteReviews";
 
 const Home = () => {
   const [doctors, setDoctors] = useState([]);
@@ -26,58 +28,23 @@ const Home = () => {
   }, [getDoctor]); // Dependency array ensures it runs only once
 
   return (
-    <Box display={"flex"} alignItems={"center"} justifyContent={"center"} flexDir={"column"}>
+    <Box
+      display={"flex"}
+      alignItems={"center"}
+      justifyContent={"center"}
+      flexDir={"column"}
+      background={"#F5F7FA"}
+    >
       <Navbar />
-      <Box
-        height={"auto"}
-        minH={"90vh"}
-        w={"100vw"}
-        background={"linear-gradient(to right, #393f4d, #6b707a)"}
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"space-evenly"}
-        pb={"50px"}
-        pt={"60px"}
-        position={"relative"}
-        className="homePageMain"
-      >
-        <Box width="40%" className="homeTextBox">
-          <h1
-            style={{
-              color: "white",
-              fontSize: "clamp(30px,4vw,40px)",
-              fontWeight: "700",
-              letterSpacing: "1px",
-            }}
-          >
-            Guiding you to a<span style={{ color: "#78be20" }}> stronger</span>{" "}
-            organization with better patient outcomes
-          </h1>
-          <Box marginTop={"25px"}>
-            <Link
-               className="homePageBtn"
-              to="doctors"
-              smooth={true}
-              duration={500}
-            >
-              Explore Now
-            </Link>
-          </Box>
-        </Box>
-        <img
-          src="../images/doctorHomeImg.png"
-          alt=""
-          style={{ width: "42vw" }}
-          className="homeImg"
-        />
-        <div className="homeFoot">
-          <h1>
-            <span>HealthTalk</span> Find, Connect, and Consult with Top Doctors
-          </h1>
-        </div>
-      </Box>
-      <Doctors id="doctors" doctors={doctors} setDoctors={setDoctors}/>
-      <Testimonial />
+
+      <HeroSection />
+      <TopDoctors id="doctors" doctors={doctors} setDoctors={setDoctors} />
+      <WebsiteReview />
+
+      <FAQ />
+
+      {/* <Testimonial /> */}
+
       <Footer />
     </Box>
   );

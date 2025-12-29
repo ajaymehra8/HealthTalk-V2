@@ -14,6 +14,7 @@ import { useAuthState } from "../../context/AuthProvider";
 import Sidebar from "./Sidebar";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
+import Logo from "../Logo/Logo";
 
 const Login = () => {
   const { user, setUser } = useAuthState();
@@ -134,20 +135,7 @@ const Login = () => {
         paddingLeft={"40px"}
         className="loginModal"
       >
-        <h1
-          className="logo"
-          style={{
-            cursor: "pointer",
-            marginBottom: "20px",
-            fontSize: "clamp(30px, 5vw, 30px)",
-          }}
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          <span className="logo-span">H</span>ealth
-          <span className="logo-span">T</span>alk
-        </h1>
+       <Logo/>
 
         <h2
           style={{

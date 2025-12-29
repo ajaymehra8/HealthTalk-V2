@@ -141,7 +141,7 @@ const navigate=useNavigate();
         </div>
         {!(user?.role === "admin") ? (
           <button
-            className="homePageBtn"
+            className="mainButton"
             style={{
               marginTop: "0",
               borderRadius: "10px",
