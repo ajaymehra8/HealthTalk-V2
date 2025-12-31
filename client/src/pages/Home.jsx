@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Box } from "@chakra-ui/react";
 import axios from "axios";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar/Navbar";
 import TopDoctors from "../components/HomePage/TopDoctors";
-import Testimonial from "../components/HomePage/Testimonial";
+// import Testimonial from "../components/HomePage/Testimonial";
 import Footer from "../components/Footer";
 import HeroSection from "../components/HomePage/HeroSection";
 import FAQ from "../components/HomePage/FAQ";

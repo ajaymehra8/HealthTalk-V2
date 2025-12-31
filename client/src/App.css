@@ -10,6 +10,7 @@
   --page-padding-x: 70px;
   --page-padding-y: 96px;
 }
+
 body {
   background-color: var(--page-background-color);
   color: var(--regular-color);
@@ -377,6 +378,22 @@ body {
   color: white;
 }
 
+/* For md screen */
+@media (max-width:700px) {
+  :root{
+    --page-padding-x:40px;
+    --page-padding-y:80px;
+  }
+}
+
+/* For sm screen */
+@media (max-width:500px) {
+  :root{
+    --page-padding-x:15px;
+    --page-padding-y:40px;
+  }
+}
+
 @media (max-width: 950px) {
   .userCard {
     z-index: 3;
@@ -391,20 +408,18 @@ body {
     left: 260px;
   }
 }
-@media (max-width: 900px) {
+@media (max-width: 991px) {
   .homePageMain {
     justify-content: start !important;
     gap: 30px;
     flex-direction: column-reverse;
   }
-  .homeTextBox {
-    width: clamp(330px, 80vw, 800px) !important;
-  }
+  
   .homeFoot {
     display: none !important;
   }
   .homeImg {
-    width: clamp(400px, 35vw, 600px) !important;
+  display: none;
   }
   .testimonialImg {
     width: clamp(300px, 90vw, 900px) !important;
@@ -417,6 +432,7 @@ body {
   }
 }
 @media (max-width: 800px) {
+
 }
 @media (max-width: 500px) {
   .test {
@@ -440,9 +456,7 @@ body {
   .footerLinks {
     gap: 15px;
   }
-  .homePageMain {
-    gap: 45px;
-  }
+
 
   .reqButtons {
     flex-direction: column;

@@ -1,0 +1,73 @@
+.navLinks,
+.profUl {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  margin-right: 50px;
+}
+.navLinks {
+  margin-right: 0;
+}
+
+.profUl {
+  flex-direction: column;
+  align-items: start;
+  gap: 25px;
+  margin: 25px 0;
+}
+.profLi {
+  font-size: 17px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  font-weight: 400;
+  transition: all 0.2s;
+}
+.profLi:hover {
+  color: rgb(212, 208, 208);
+}
+.profIcon {
+  margin-right: 4px;
+}
+
+/* responsive classes */
+.resNavLinks {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 30px 20px;
+  background: #F5F7FA;
+box-shadow: 0 10px 30px -15px rgba(141, 141, 141, 0.7);
+transition: all .5s ease-out;
+}
+
+.closeOptions{
+    left:-100%;
+}
+.openOptions{
+    left:0;
+}
+.hamburgerButton{
+    display: inline-block;
+    position: absolute;
+    right:15px;
+}
+@media(min-width:892px){
+    .hamburgerButton{
+        display: none;
+    }
+    .resNavLinks{
+        display: none;
+    }
+}
+
+@media (max-width: 892px) {
+  .navLinks {
+    display: none;
+  }
+}

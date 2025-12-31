@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, position } from "@chakra-ui/react";
 import { useAuthState } from "../../context/AuthProvider";
-import Navbar from "../Navbar";
+import Navbar from "../Navbar/Navbar";
 import UserInfoCard from "./UserInfoCard";
 import ProfSideBar from "../ProfSideBar";
 import { Routes, Route, Navigate } from "react-router-dom";

@@ -96,33 +96,28 @@ const WebsiteReview = () => {
   const pathRef = useRef(null);
   const [dotPositions, setDotPositions] = useState([]);
   const [pauseAnimation, setPauseAnimation] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 900 : true
+  );
   const CARD_HEIGHT = 256;
   const GAP = 32;
   const speed = 3000;
 
-  /* dots along arc */
   useEffect(() => {
-    const el = pathRef.current;
-    if (!el ) return;
-
-    const total = el.getTotalLength();
-    const margin = 10;
-    const step = (total - margin * 2) / (cardDetails.length + 1);
-
-    setDotPositions(
-      cardDetails.map((_, i) => el.getPointAtLength(margin + step * (i + 0.5)))
-    );
+    const onResize = () => setIsDesktop(window.innerWidth >= 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   /* auto scroll */
   useEffect(() => {
-    if(pauseAnimation) return;
+    if (!isDesktop || pauseAnimation) return;
     const i = setInterval(
       () => setActiveIndex((p) => (p + 1) % cardDetails.length),
       speed
     );
     return () => clearInterval(i);
-  }, [pauseAnimation]);
+  }, [pauseAnimation, isDesktop]);
 
   return (
     <section className="review-section">
@@ -136,7 +131,8 @@ const WebsiteReview = () => {
             style={{ lineHeight: 1.2 }}
           >
             Trusted by <span className="highlight">Patients</span>
-            <br className="text-br"/> and <span className="highlight">Clinics</span>
+            <br className="text-br" /> and{" "}
+            <span className="highlight">Clinics</span>
           </Typography>
           <Typography variant="lgRegular" style={{ lineHeight: 1.2 }}>
             Real experiences from people <br />
@@ -146,77 +142,80 @@ const WebsiteReview = () => {
 
         {/* Right carousel */}
         <div className="review-right">
-          {/* <svg
-            viewBox="0 0 254 696"
-            className="arc"
-            fill="none"
-          >
-            <path
-              ref={pathRef}
-              d="M252.693 695C115.467 648.388 9.70215 539.643 9.70215 348C9.70215 156.357 138.896 28.1903 252.693 1"
-              stroke="url(#grad)"
-              strokeWidth="2"
-            />
-
-            {dotPositions.map((p, i) => {
-              const active = i === cardDetails.length - 1 - activeIndex;
-              return (
-                <g key={i}>
-                  {active && (
-                    <circle
-                      cx={p.x}
-                      cy={p.y}
-                      r={13}
-                      stroke="#00D9A3"
-                      strokeWidth="2"
-                      fill="none"
-                    />
-                  )}
-                  <circle
-                    cx={p.x}
-                    cy={p.y}
-                    r={active ? 9 : 6}
-                    fill="#00D9A3"
-                    opacity={active ? 1 : 0.5}
-                  />
-                </g>
-              );
-            })}
-
-            <defs>
-              <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                <stop stopColor="#0F1419" />
-                <stop offset="0.5" stopColor="#00F9D1" />
-                <stop offset="1" stopColor="#0F1419" />
-              </linearGradient>
-            </defs>
-          </svg> */}
-
           <motion.div
             className="card-column"
-            animate={{
-              y: `calc(-${activeIndex} * (${CARD_HEIGHT + GAP}px) + 250px - ${
-                CARD_HEIGHT / 2
-              }px)`,
-            }}
-            transition={{ duration: speed / 2000 }}
+            animate={
+              isDesktop
+                ? {
+                    y: `calc(-${activeIndex} * (${
+                      CARD_HEIGHT + GAP
+                    }px) + 250px - ${CARD_HEIGHT / 2}px)`,
+                  }
+                : {}
+            }
+            transition={{ type: "spring", stiffness: 260, damping: 30 }}
           >
             {cardDetails.map((item, i) => {
-              const active = i === activeIndex;
+              const offset = i - activeIndex;
+
               return (
                 <motion.div
                   key={i}
-                  animate={{
-                    x: active ? -50 : Math.abs(i - activeIndex) * 100,
-                    scale: active ? 1 : 0.9,
-                    opacity: active ? 1 : 0.5,
+                  drag={!isDesktop ? "x" : false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.15}
+                  onDragEnd={(e, info) => {
+                    if (isDesktop) return;
+
+                    if (
+                      info.offset.x < -60 &&
+                      activeIndex < cardDetails.length - 1
+                    ) {
+                      setActiveIndex((p) => p + 1);
+                    }
+                    if (info.offset.x > 60 && activeIndex > 0) {
+                      setActiveIndex((p) => p - 1);
+                    }
                   }}
+                  animate={{
+                    x: isDesktop
+                      ? activeIndex === i
+                        ? -50
+                        : Math.abs(i - activeIndex) * 100
+                      : offset * (350 + 20),
+
+                    scale: activeIndex === i ? 1 : 0.9,
+                    opacity: activeIndex === i ? 1 : 0.4,
+                    zIndex: 100 - Math.abs(offset),
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={
+                    isDesktop
+                      ? {}
+                      : {
+                          position: "absolute",
+                          left: "50%",
+                          marginLeft: `-${350 / 2}px`,
+                        }
+                  }
                 >
                   <Card item={item} setPauseAnimation={setPauseAnimation} />
                 </motion.div>
               );
             })}
           </motion.div>
+
+          {!isDesktop && (
+            <div className="review-dots">
+              {cardDetails.map((_, i) => (
+                <button
+                  key={i}
+                  className={`dot ${i === activeIndex ? "active" : ""}`}
+                  onClick={() => setActiveIndex(i)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

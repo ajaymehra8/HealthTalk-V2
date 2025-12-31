@@ -5,7 +5,7 @@ import Typography from "../ui/Typography";
 const HeroSection = () => {
   return (
     <Box
-      height={"95vh"}
+      height={{ base:"auto", lg: "95vh" }}
       width={"100vw"}
       background={`linear-gradient(
   135deg,
@@ -15,7 +15,8 @@ const HeroSection = () => {
 )`}
       px={"var(--page-padding-x)"}
       overflow={"hidden"}
-      pt={"60px"}
+      mt={"60px"}
+      py={{ base: "50px", lg: "0" }}
       display={"flex"}
       flexDirection={"column"}
       alignItems={"center"}
@@ -31,7 +32,13 @@ const HeroSection = () => {
         alignItems={"center"}
         justifyContent={"space-between"}
       >
-        <Box width="50%" className="homeTextBox">
+        <Box
+          width={{ sm: "clamp(350px,100%,500px)", lg: "clamp(400px,50%,540px)" }}
+          textAlign={{ base: "center", lg: "left" }}
+          display={"flex"}
+          flexDirection={"column"}
+          alignItems={{base:"center",lg:"flex-start"}}
+        >
           <Typography
             as="h1"
             variant="heading"
@@ -47,13 +54,14 @@ const HeroSection = () => {
             as="p"
             style={{
               marginTop: "10px",
+              marginBottom:"20px",
             }}
             weight="semibold"
           >
             Connect with verified doctors, book appoinments,
-            <br /> and manage clinics effortlessly.
+            and manage clinics effortlessly.
           </Typography>
-          <Box marginTop={"25px"}>
+
             <Link
               className="mainButton"
               to="doctors"
@@ -62,7 +70,7 @@ const HeroSection = () => {
             >
               Find a Doctor
             </Link>
-          </Box>
+
         </Box>
 
         <img src="../images/hero.png" alt="" className="homeImg" />

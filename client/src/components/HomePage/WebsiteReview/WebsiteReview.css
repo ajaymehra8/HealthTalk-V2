@@ -36,15 +36,6 @@
   width: 50%;
   position: relative;
   height: 500px;
-
-}
-
-.arc {
-  position: absolute;
-  left: -200px;
-  top: 50%;
-  height: 100%;
-  transform: translateY(-50%);
 }
 
 .card-column {
@@ -65,15 +56,14 @@
   border-left: 3px solid var(--secondary-green-color);
   border-radius: 10px;
   box-shadow: 2px 3px 10px #999898;
-  background: linear-gradient(to right, #e6eef6 0%, #d4e2f1 50%, #c1d6eb 100%);
+  background: linear-gradient(to right, #eef1f3 0%, #e6eff8 50%, #d5e6f7 100%);
   cursor: pointer;
   transition: all 0.5s;
 }
 
 .review-card:hover {
   transform: scale(1.05);
-    box-shadow: 2px 10px 10px #999898;
-
+  box-shadow: 2px 10px 10px #999898;
 }
 
 .card-top {
@@ -85,10 +75,6 @@
 .stars {
   display: flex;
   gap: 8px;
-}
-
-.quote-icon {
-  width: 32px;
 }
 
 .description {
@@ -113,7 +99,77 @@
   display: block;
 }
 
-@media (max-width: 1100px) {
+.review-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #aaa;
+  border: none;
+  transition: transform 0.3s, background 0.3s;
+}
+
+.dot.active {
+  background: var(--secondary-green-color);
+  transform: scale(1.4);
+}
+
+
+@media (max-width: 900px) {
+  .review-container {
+    flex-direction: column;
+    gap: 20px;
+    overflow: auto;
+    padding-bottom: var(--page-padding-y);
+  }
+
+  .review-left {
+    width: 100%;
+    position: static;
+    padding-top: var(--page-padding-y);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    top: 0;
+  }
+
+  .review-right {
+    width: 100%;
+  }
+   .card-column {
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
+  }
+
+  .card-column::-webkit-scrollbar {
+    display: none;
+  }
+  .card-column {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    overflow: hidden; 
+    gap: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+.review-right{
+  height: auto;
+}
+  .review-card {
+    width: 350px;
+    min-width: 350px;
+  }
+
   .text-br {
     display: none;
   }

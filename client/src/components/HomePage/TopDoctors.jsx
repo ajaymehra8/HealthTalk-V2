@@ -1,14 +1,18 @@
 import { Box, Select, SimpleGrid } from "@chakra-ui/react";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DoctorCard from "../Doctors/DoctorCard";
 import { Link } from "react-router-dom";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import Typography from "../ui/Typography";
+import DoctorCardSkeleton from "../Doctors/DoctorCardSkelton";
 
 const TopDoctors = ({ id, doctors, setDoctors }) => {
   const [showMap, setShowMap] = useState(false);
   const [loadingText, setLoadingText] = useState("Loading Doctors...");
+  const [isDesktop, setIsDesktop] = useState(
+      typeof window !== "undefined" ? window.innerWidth >= 900 : true
+    );
   const getSingleDoctor = async (id) => {
     const { data } = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/v1/user/${id}`
@@ -16,6 +20,11 @@ const TopDoctors = ({ id, doctors, setDoctors }) => {
     return data.doctor;
   };
 
+    useEffect(() => {
+      const onResize = () => setIsDesktop(window.innerWidth >= 900);
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+    }, []);
   const fetchDoctors = async (queryName) => {
     setShowMap(false);
     try {
@@ -87,7 +96,6 @@ const TopDoctors = ({ id, doctors, setDoctors }) => {
       display={"flex"}
       alignItems={"center"}
       justifyContent={"center"}
-      minH={"80vh"}
       flexDir={"column"}
       paddingX={"var(--page-padding-x)"}
       paddingY={"var(--page-padding-y)"}
@@ -143,32 +151,26 @@ const TopDoctors = ({ id, doctors, setDoctors }) => {
             <option value="near-me">Clinic near you</option>
             <option value="price">Price</option>
           </Select> */}
-        {doctors.length > 0 ? (
-          <>
-            <SimpleGrid
-              columns={{ base: 1,sm:1, md: 2, lg: 3,xl:4 }}
-              spacing="40px"
-              spacingY={"56px"}
-              p={"0 0 20px"}
-            >
-              {doctors.slice(0, 8).map((d) => (
-                <DoctorCard
-                  key={d._id}
-                  doctor={d}
-                  handleFunction={() => getSingleDoctor(d._id)}
-                />
-              ))}
-            </SimpleGrid>
-            {/* this link to doctor page once we have one */}
-            <Link to={"/#"} className="viewAllLink">
-              View all doctors <FaLongArrowAltRight size={25} />
-            </Link>
-          </>
-        ) : (
-          <h1 className="no-item-text" style={{ alignSelf: "center" }}>
-            {loadingText}
-          </h1> // Loading fallback
-        )}
+        <SimpleGrid
+          columns={{ base: 1, sm: 1, md: 2, lg: 3, xl: 4 }}
+          spacing="40px"
+          spacingY="56px"
+          p="0 0 20px"
+        >
+          {doctors.length < 1
+            ? Array.from({ length: isDesktop?8:2 }).map((_, index) => (
+                <DoctorCardSkeleton key={index} />
+              ))
+            : doctors
+                .slice(0, 8)
+                .map((d) => (
+                  <DoctorCard
+                    key={d._id}
+                    doctor={d}
+                    handleFunction={() => getSingleDoctor(d._id)}
+                  />
+                ))}
+        </SimpleGrid>
       </>
     </Box>
   );

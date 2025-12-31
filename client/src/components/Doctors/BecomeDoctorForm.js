@@ -1,6 +1,6 @@
 import { Box, Input, Button, Text, useToast, Flex, Textarea } from "@chakra-ui/react";
 import React, { useEffect, useRef, useState } from "react";
-import Navbar from "../Navbar";
+import Navbar from "../Navbar/Navbar";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "../../context/AuthProvider";
