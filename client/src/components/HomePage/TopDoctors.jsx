@@ -171,6 +171,10 @@ const TopDoctors = ({ id, doctors, setDoctors }) => {
                   />
                 ))}
         </SimpleGrid>
+        <Link to="/doctors" className="viewAllLink">
+  View all doctors <FaLongArrowAltRight size={25} />
+</Link>
+
       </>
     </Box>
   );

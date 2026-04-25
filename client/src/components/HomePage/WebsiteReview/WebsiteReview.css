@@ -1,7 +1,6 @@
 .review-section {
   width: 100%;
   padding-inline: var(--page-padding-x);
-  background: linear-gradient(135deg, #e6eef6 0%, #d4e2f1 50%, #c1d6eb 100%);
 }
 
 .review-container {

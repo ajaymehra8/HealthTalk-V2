@@ -30,12 +30,12 @@ const Typography = ({
       color: "var(--regular-color)",
     },
     regularVariant: {
-      fontSize: { base: "15px", md: "16px", lg: "18px" },
+      fontSize: { base: "14px", md: "16px", lg: "18px" },
       lineHeight: "1.6",
       color: "var(--regular-color)",
     },
     small: {
-      fontSize: { base: "13px", md: "14px" },
+      fontSize: { base: "14px", md: "16px" },
       lineHeight: "1.4",
       color: "var(--regular-color)",
     },

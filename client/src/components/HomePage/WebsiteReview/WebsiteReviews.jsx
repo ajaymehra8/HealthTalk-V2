@@ -120,7 +120,7 @@ const WebsiteReview = () => {
   }, [pauseAnimation, isDesktop]);
 
   return (
-    <section className="review-section">
+    <section className="review-section gradient-bg2">
       <div className="review-container">
         {/* Left text */}
         <div className="review-left">
