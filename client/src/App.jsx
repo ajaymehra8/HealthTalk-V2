@@ -2,13 +2,13 @@ import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./components/Auth/Login";
-import Signup from "./components/Auth/Signup";
 import UserInfo from "./components/User/UserProfile";
 import { useAuthState } from "./context/AuthProvider";
 import DocProf from "./components/Doctors/DocProf";
 import Review from "./components/Reviews/Review";
 import BecomeDoctorForm from "./components/Doctors/BecomeDoctorForm";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import Signup from "./components/Auth/Signup";
 
 function App() {
   const { user } = useAuthState();

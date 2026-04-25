@@ -7,12 +7,7 @@ const HeroSection = () => {
     <Box
       height={{ base:"auto", lg: "95vh" }}
       width={"100vw"}
-      background={`linear-gradient(
-  135deg,
-  #E6EEF6 0%,
-  #D4E2F1 50%,
-  #C1D6EB 100%
-)`}
+    className="gradient-bg"
       px={"var(--page-padding-x)"}
       overflow={"hidden"}
       mt={"60px"}

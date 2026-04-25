@@ -1,12 +1,12 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
 
-const Logo = () => {
+const Logo = ({style={}}) => {
   const navigate=useNavigate();
   return (
      <h1
         className="logo"
-        style={{ cursor: "pointer" }}
+        style={{ cursor: "pointer",...style }}
         onClick={() => {
           navigate("/");
         }}
