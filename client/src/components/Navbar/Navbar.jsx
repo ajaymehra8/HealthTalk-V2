@@ -77,7 +77,14 @@ const Navbar = () => {
           <Tooltip label="Your Profile" placement="bottom">
             <li className="navLink">
               <NavLink to={"/my-profile"}>
-                <Avatar src={user?.image} size={"sm"} />{" "}
+                <Avatar
+                  src={user?.image || ""}
+                  name={user?.name || "Anonymous Member"}
+                  size="sm"
+                  bg="var(--auth-soft-accent-bg)"
+                  color="var(--heading-color)"
+                  border="1px solid var(--auth-soft-accent-border)"
+                />{" "}
               </NavLink>
             </li>
           </Tooltip>
@@ -112,7 +119,14 @@ const Navbar = () => {
           <Tooltip label="Your Profile" placement="bottom">
             <li className="navLink">
               <NavLink to={"/my-profile"}>
-                <Avatar src={user?.image} size={"sm"} />{" "}
+                <Avatar
+                  src={user?.image || ""}
+                  name={user?.name || "Anonymous Member"}
+                  size="sm"
+                  bg="var(--auth-soft-accent-bg)"
+                  color="var(--heading-color)"
+                  border="1px solid var(--auth-soft-accent-border)"
+                />{" "}
               </NavLink>
             </li>
           </Tooltip>
