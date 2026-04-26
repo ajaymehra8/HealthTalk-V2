@@ -14,7 +14,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { FiSearch, FiUserPlus } from "react-icons/fi";
 import { RxCross2, RxHamburgerMenu } from "react-icons/rx";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthState } from "../../context/AuthProvider";
 import Logo from "../Logo/Logo";
 
@@ -158,11 +158,13 @@ const ProfileButton = ({ user, onClick }) => (
 const Navbar = () => {
   const { user } = useAuthState();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isOpen, onToggle, onClose } = useDisclosure();
+  const authReturnTo = `${location.pathname}${location.search || ""}`;
 
   const goToLogin = () => {
     onClose();
-    navigate("/login");
+    navigate("/login", { state: { from: authReturnTo } });
   };
 
   const goToDoctors = () => {
@@ -172,7 +174,7 @@ const Navbar = () => {
 
   const goToSignup = () => {
     onClose();
-    navigate("/signup");
+    navigate("/signup", { state: { from: authReturnTo } });
   };
 
   const goToDoctorForm = () => {

@@ -19,36 +19,25 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FiAlertTriangle } from "react-icons/fi";
-import { useAuthState } from "../../context/AuthProvider";
 import axios from "axios";
+import { useProtectedRoute } from "../../hooks/useProtectedRoute";
 
 const MotionBox = motion(Box);
 
 function ReportModal({ isOpen, onClose, doctorId }) {
-  const { user } = useAuthState();
   const [report, setReport] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const { currentUser, requireAuth } = useProtectedRoute();
 
   const handleReport = async () => {
-    const token = user?.jwt;
-    if (!user) {
-      toast({
-        title: "Please logged in first",
-        status: "warning",
-        isClosable: true,
-        duration: 5000,
-        position: "top",
-      });
-      return;
-    }
-
-    if (!token) {
+    if (!requireAuth(null, { loginMessage: "You have to login first" })) {
       return;
     }
 
     setLoading(true);
     try {
+      const token = currentUser?.jwt;
       const headers = {
         "Content-Type": "application/json",
         authorization: `Bearer ${token}`,

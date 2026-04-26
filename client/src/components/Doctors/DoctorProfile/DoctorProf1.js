@@ -16,8 +16,8 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FiCalendar, FiDollarSign, FiFlag, FiMapPin, FiTrash2 } from "react-icons/fi";
-import { useAuthState } from "../../../context/AuthProvider";
 import ReportModal from "../../Report/ReportModal";
+import { useProtectedRoute } from "../../../hooks/useProtectedRoute";
 
 const MotionBox = motion(Box);
 
@@ -59,11 +59,11 @@ const ActionStat = ({ label, value }) => (
 );
 
 const DoctorProf1 = ({ doctor }) => {
-  const { user } = useAuthState();
   const toast = useToast();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { currentUser, requireAuth } = useProtectedRoute();
 
   const doctorName = doctor?.name ? formatDoctorName(doctor.name) : "Doctor";
   const doctorSpecialization = doctor?.specialization || "Specialist";
@@ -76,7 +76,8 @@ const DoctorProf1 = ({ doctor }) => {
   const doctorFee = doctor?.clinicFee ? `$${doctor.clinicFee}` : "Fee not listed";
 
   const handleDelete = async () => {
-    if (!user?.jwt || !doctor?._id) return;
+    if (!doctor?._id) return;
+    if (!requireAuth()) return;
 
     setLoading(true);
     try {
@@ -85,7 +86,7 @@ const DoctorProf1 = ({ doctor }) => {
         {
           headers: {
             "Content-Type": "application/json",
-            authorization: `Bearer ${user.jwt}`,
+            authorization: `Bearer ${currentUser.jwt}`,
           },
         }
       );
@@ -126,23 +127,14 @@ const DoctorProf1 = ({ doctor }) => {
 
   const bookAppoinment = async () => {
     if (!doctor?._id) return;
-
-    if (!user) {
-      return toast({
-        title: "You are not logged in",
-        status: "error",
-        isClosable: true,
-        duration: 5000,
-        position: "top",
-      });
-    }
+    if (!requireAuth()) return;
 
     setLoading(true);
     try {
       const body = { doctor };
       const headers = {
         "Content-Type": "application/json",
-        authorization: `Bearer ${user?.jwt}`,
+        authorization: `Bearer ${currentUser?.jwt}`,
       };
 
       const { data } = await axios.post(
@@ -332,7 +324,7 @@ const DoctorProf1 = ({ doctor }) => {
               align={{ base: "stretch", sm: "center" }}
               justify="flex-start"
             >
-              {user?.role === "admin" ? (
+              {currentUser?.role === "admin" ? (
                 <Button
                   onClick={!loading ? handleDelete : undefined}
                   isLoading={loading}
@@ -379,10 +371,10 @@ const DoctorProf1 = ({ doctor }) => {
                 </Button>
               )}
 
-              {user?.role !== "admin" && (
+              {currentUser?.role !== "admin" && (
                 <Tooltip label="Report" aria-label="Report doctor" placement="top">
                   <IconButton
-                    onClick={onOpen}
+                    onClick={() => requireAuth(() => onOpen())}
                     aria-label="Report doctor"
                     icon={<Box as={FiFlag} />}
                     h="44px"

@@ -8,6 +8,7 @@ import DocProf from "./components/Doctors/DocProf";
 import Review from "./components/Reviews/Review";
 import BecomeDoctorForm from "./components/Doctors/BecomeDoctorForm";
 import Doctors from "./pages/Doctors";
+import { GuestRoute, ProtectedRoute } from "./hooks/useProtectedRoute";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Signup from "./components/Auth/Signup";
 
@@ -36,13 +37,51 @@ const GoogleAuthWrapperForSignUp=()=>{
         }
       />
 
-      <Route path="/login" element={<GoogleAuthWrapper />} />
-      <Route path="/signup" element={<GoogleAuthWrapperForSignUp/>} />
-      <Route path="/my-profile/*" element={<UserInfo />} />
+      <Route
+        path="/login"
+        element={
+          <GuestRoute>
+            <GoogleAuthWrapper />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <GuestRoute>
+            <GoogleAuthWrapperForSignUp />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/my-profile/*"
+        element={
+          <ProtectedRoute>
+            <UserInfo />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/doctors" element={<Doctors />} />
-      <Route path="/doctor-profile" element={(user?.role==="user" || user?.role==="admin" || !user)&&<DocProf />} />
-      <Route path="/doctor/review" element={<Review />} />
-      <Route path="/doctor/form" element={user?.role==="user"&&<BecomeDoctorForm />} />
+      <Route
+        path="/doctor-profile"
+        element={(user?.role === "user" || user?.role === "admin" || !user) && <DocProf />}
+      />
+      <Route
+        path="/doctor/review"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <Review />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctor/form"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <BecomeDoctorForm />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

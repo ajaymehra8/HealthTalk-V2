@@ -11,14 +11,14 @@ import {
 import { HStack } from "@chakra-ui/react";
 import Typography from "../ui/Typography";
 import { useNavigate } from "react-router-dom";
-import { useAuthState } from "../../context/AuthProvider";
 import axios from "axios";
+import { useProtectedRoute } from "../../hooks/useProtectedRoute";
 
 const DoctorCard = ({ doctor, handleFunction }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [bookLoading, setBookLoading] = useState(false);
-  const { user } = useAuthState();
+  const { currentUser, requireAuth } = useProtectedRoute();
 
   const toast = useToast();
 
@@ -31,19 +31,12 @@ const DoctorCard = ({ doctor, handleFunction }) => {
 
   const bookAppoinment = async (e) => {
     e.stopPropagation();
-    if (!user) {
-      return toast({
-        title: "You are not logged in",
-        status: "error",
-        isClosable: true,
-        duration: 5000,
-        position: "top",
-      });
-    }
+    if (!requireAuth()) return;
+
     const body = {
       doctor,
     };
-    const token = user?.jwt;
+    const token = currentUser?.jwt;
     setBookLoading(true);
     const headers = {
       "Content-Type": "application/json",

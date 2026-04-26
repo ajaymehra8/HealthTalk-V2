@@ -29,7 +29,7 @@ import {
 } from "react-icons/fi";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer";
-import { useAuthState } from "../../context/AuthProvider";
+import { useProtectedRoute } from "../../hooks/useProtectedRoute";
 
 const MotionBox = motion(Box);
 
@@ -105,16 +105,16 @@ const InfoTile = ({ icon, label, value }) => (
 const Review = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuthState();
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const { currentUser, requireAuth } = useProtectedRoute();
   const doctor = state?.user;
 
   useEffect(() => {
     if (!doctor) {
-      navigate("/my-info", { replace: true });
+      navigate("/my-profile/my-info", { replace: true });
     }
   }, [doctor, navigate]);
 
@@ -130,11 +130,28 @@ const Review = () => {
   const doctorFee = doctor?.clinicFee ? `$${doctor.clinicFee}` : "Fee not listed";
 
   const handleApplication = () => {
-    navigate("/doctor/form");
+    requireAuth(
+      () => navigate("/doctor/form"),
+      {
+        allowedRoles: ["user"],
+        unauthorizedMessage: "You are not allowed to do this action.",
+        unauthorizedRedirect: "/",
+      }
+    );
   };
 
   const handleFeedback = async () => {
-    const token = user?.jwt;
+    if (
+      !requireAuth(null, {
+        allowedRoles: ["user"],
+        unauthorizedMessage: "You are not allowed to do this action.",
+        unauthorizedRedirect: "/",
+      })
+    ) {
+      return;
+    }
+
+    const token = currentUser?.jwt;
     const url = `${process.env.REACT_APP_API_URL}/api/v1/review/${doctor?._id}`;
     setLoading(true);
     const { data } = await axios.post(
