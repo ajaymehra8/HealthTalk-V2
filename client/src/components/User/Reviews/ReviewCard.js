@@ -35,7 +35,7 @@ const ReviewCard = ({ review, setReviews, index = 0 }) => {
 
   const openDoctorProfile = () => {
     if (!doctor?._id) return;
-    navigate("/doctor-profile", { state: { user: doctor } });
+    navigate(`/doctor-profile/${doctor._id}`);
   };
 
   const handleDelete = async () => {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, useToast } from "@chakra-ui/react";
+import { Box, useToast } from "@chakra-ui/react";
 import moment from "moment";
 import axios from "axios";
 import { useAuthState } from "../../../context/AuthProvider";
@@ -10,19 +10,10 @@ const ReportCard = ({ report, setReports, reports }) => {
   const navigate = useNavigate();
   const createdAt = report?.createdAt;
   const timeAgo = createdAt ? moment(createdAt).fromNow() : "Unknown";
-  const [loading, setLoading] = useState(false);
   const [deleteLoading,setDeleteLoading]=useState(false);
-  const handleFunction = async () => {
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/api/v1/user/${report?.doctor?._id}`
-    );
-    return data.doctor;
-  };
-  const handleViewProfile = async () => {
-    setLoading(true);
-    const doctorProf = await handleFunction(); // Assume this function fetches the doctor's profile data
-    setLoading(false);
-    navigate("/doctor-profile", { state: { user: doctorProf } }); // Pass the profile data using `state`
+  const handleViewProfile = () => {
+    if (!report?.doctor?._id) return;
+    navigate(`/doctor-profile/${report.doctor._id}`);
   };
   const { user } = useAuthState();
   const handleDelete = async () => {
@@ -102,18 +93,13 @@ const ReportCard = ({ report, setReports, reports }) => {
           <button
             className=" rounded-btn"
             style={{
-              background: loading && "gray",
-              borderColor: loading && "gray",
-              backgroundColor: !loading ? "#78be20" : "gray",
+              backgroundColor: "#78be20",
               color: "white",
-              letterSpacing:"1px"
-
+              letterSpacing: "1px",
             }}
-            onClick={!loading ? handleViewProfile : undefined}
-            disabled={loading}
-            cursor={loading && "not-allowed"}
+            onClick={handleViewProfile}
           >
-            {!loading ? "View" : "Wait..."}
+            View
           </button>
 
           <button

@@ -63,8 +63,20 @@ const GoogleAuthWrapperForSignUp=()=>{
       />
       <Route path="/doctors" element={<Doctors />} />
       <Route
+        path="/doctor-profile/:doctorId"
+        element={<DocProf />}
+      />
+      <Route
         path="/doctor-profile"
-        element={(user?.role === "user" || user?.role === "admin" || !user) && <DocProf />}
+        element={<DocProf />}
+      />
+      <Route
+        path="/doctor/review/:doctorId"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <Review />
+          </ProtectedRoute>
+        }
       />
       <Route
         path="/doctor/review"

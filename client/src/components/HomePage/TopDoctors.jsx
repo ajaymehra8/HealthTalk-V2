@@ -13,12 +13,6 @@ const TopDoctors = ({ id, doctors, setDoctors }) => {
   const [isDesktop, setIsDesktop] = useState(
       typeof window !== "undefined" ? window.innerWidth >= 900 : true
     );
-  const getSingleDoctor = async (id) => {
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/api/v1/user/${id}`
-    );
-    return data.doctor;
-  };
 
     useEffect(() => {
       const onResize = () => setIsDesktop(window.innerWidth >= 900);
@@ -167,7 +161,6 @@ const TopDoctors = ({ id, doctors, setDoctors }) => {
                   <DoctorCard
                     key={d._id}
                     doctor={d}
-                    handleFunction={() => getSingleDoctor(d._id)}
                   />
                 ))}
         </SimpleGrid>

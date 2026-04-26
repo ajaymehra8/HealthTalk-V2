@@ -101,8 +101,9 @@ const ReqCard = ({ req, setReqs }) => {
         <Tooltip label="View Profile" placement="bottom">
           <button
             onClick={() => {
-              const doctor = { ...req.user, ...req };
-              navigate("/doctor-profile", { state: { user: doctor } });
+              const doctorId = req.user?._id || req._id;
+              if (!doctorId) return;
+              navigate(`/doctor-profile/${doctorId}`);
             }}
           >
             <i class="bi bi-eye"></i>

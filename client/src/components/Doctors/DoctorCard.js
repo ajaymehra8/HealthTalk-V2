@@ -14,19 +14,16 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useProtectedRoute } from "../../hooks/useProtectedRoute";
 
-const DoctorCard = ({ doctor, handleFunction }) => {
+const DoctorCard = ({ doctor }) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [bookLoading, setBookLoading] = useState(false);
   const { currentUser, requireAuth } = useProtectedRoute();
 
   const toast = useToast();
 
-  const handleViewProfile = async () => {
-    setLoading(true);
-    const doctorProf = await handleFunction(); // Assume this function fetches the doctor's profile data
-    setLoading(false);
-    navigate("/doctor-profile", { state: { user: doctorProf } }); // Pass the profile data using `state`
+  const handleViewProfile = () => {
+    if (!doctor?._id) return;
+    navigate(`/doctor-profile/${doctor._id}`);
   };
 
   const bookAppoinment = async (e) => {

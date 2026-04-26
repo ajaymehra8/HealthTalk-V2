@@ -42,13 +42,6 @@ const Doctors = () => {
 
   const skeletonCount = useBreakpointValue({ base: 4, md: 6, xl: 8 }) ?? 4;
 
-  const getSingleDoctor = useCallback(async (id) => {
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/api/v1/user/${id}`
-    );
-    return data.doctor;
-  }, []);
-
   const fetchDoctors = useCallback(
     async (filter = "all") => {
       setLoading(true);
@@ -439,10 +432,7 @@ const Doctors = () => {
                         display="flex"
                         justifyContent="center"
                       >
-                        <DoctorCard
-                          doctor={doctor}
-                          handleFunction={() => getSingleDoctor(doctor._id)}
-                        />
+                        <DoctorCard doctor={doctor} />
                       </MotionBox>
                     ))}
                   </SimpleGrid>

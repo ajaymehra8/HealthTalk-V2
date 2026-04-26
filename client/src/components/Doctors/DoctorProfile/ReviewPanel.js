@@ -99,7 +99,7 @@ const ReviewPanel = ({ doctor }) => {
         <Button
           onClick={() => {
             requireAuth(
-              () => navigate("/doctor/review", { state: { user: doctor } }),
+              () => navigate(`/doctor/review/${doctor?._id}`),
               {
                 allowedRoles: ["user"],
                 unauthorizedMessage: "You are not allowed to do this action.",
