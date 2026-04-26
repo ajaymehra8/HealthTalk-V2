@@ -1,113 +1,85 @@
-import { Box, Input, Button, Text, useToast, Flex, Textarea } from "@chakra-ui/react";
-import React, { useEffect, useRef, useState } from "react";
-import Navbar from "../Navbar/Navbar";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Badge,
+  Box,
+  Container,
+  Heading,
+  HStack,
+  SimpleGrid,
+  Stack,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import axios from "axios";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../Navbar/Navbar";
 import { useAuthState } from "../../context/AuthProvider";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import BackButton from "../Common/BackButton";
+import {
+  ApplicationChecklist,
+  ClinicMapSection,
+  DegreeUploadSection,
+  PersonalDetailsSection,
+  ProfessionalDetailsSection,
+  SubmitActionSection,
+  TreatmentAreaSection,
+} from "./BecomeDoctorForm/formSections";
+
+const MotionBox = motion(Box);
 
 const BecomeDoctorForm = () => {
   const { user, setUser } = useAuthState();
+  const navigate = useNavigate();
+  const toast = useToast();
 
-  // State for input values
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [education, setEducation] = useState("");
   const [pastExperience, setPastExperience] = useState("");
   const [description, setDescription] = useState("");
   const [clinicLocation, setClinicLocation] = useState("");
-  const [clinicCoordinates, setClinicCoordinates] = useState({});
-
-  const [treatmentArea, settreatmentArea] = useState([]);
+  const [clinicCoordinates, setClinicCoordinates] = useState({
+    lat: null,
+    lng: null,
+  });
+  const [treatmentArea, setTreatmentArea] = useState([]);
   const [currentArea, setCurrentArea] = useState("");
   const [clinicFee, setClinicFee] = useState(0);
   const [specialization, setSpecialization] = useState("");
   const [experienceYear, setExperienceYear] = useState(0);
-
-  const [pdfFile, setPdfFile] = useState(null); // For the PDF file
+  const [pdfFile, setPdfFile] = useState(null);
   const [fileName, setFileName] = useState("No file chosen");
-
-  const marker = useRef(null);
-  const map = useRef(null);
-
-  const navigate = useNavigate();
-
-  const mapContainer = useRef(null); // Use a ref to access the div
-
-  useEffect(() => {
-    if (!mapContainer.current) return; // Ensure the container exists
-
-    map.current = new maplibregl.Map({
-      container: mapContainer.current, // Use ref instead of ID
-      style:
-        "https://maps.geoapify.com/v1/styles/osm-carto/style.json?apiKey=17bcdbc86fda4dfca3ad3328a4ebb4d8", // Style URL
-      center: [77.1025, 28.7041], // New Delhi, India [lng, lat]
-      zoom: 0,
-    });
-    map.current.on("load", () => {
-      map.current.flyTo({
-        center: [77.1025, 28.7041], // Target location
-        zoom: 4, // Zoom-in level
-        speed: 0.8, // Animation speed (lower is slower)
-        curve: 1.5, // Smoothness of the transition
-        essential: true, // Ensures animation works smoothly
-      });
-    });
-    return () => map.current.remove(); // Cleanup on unmount
-  }, []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setName(user?.name || "");
     setEmail(user?.email || "");
   }, [user]);
-  const toast = useToast();
-  const handleKeydown = (event) => {
-    if (event.key === "Enter" && currentArea.trim() !== "") {
-      if (treatmentArea.length > 5) {
-        toast({
-          title: "You can add only 5 treatment area",
-          status: "warning",
-          position: "top",
-          isClosable: true,
-          duration: 5000,
-        });
-        return;
-      }
-      const current={
-        name:currentArea,
-        id:treatmentArea.length>0?treatmentArea.length-1+1:0,
-      }
-      settreatmentArea((prevtreatmentArea) => [
-        ...prevtreatmentArea,
-        current,
-      ]);
-      setCurrentArea("");
-    }
-  };
-  const handleChange = (event) => {
-    let value = parseInt(event.target.value, 10);
-    // Ensure the value stays within the range
-    if (value < 1) {
-      value = 1;
-    } else if (value > 30) {
-      value = 30;
-    }
-    setClinicFee(value);
-  };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+  const handleFileChange = useCallback((event) => {
+    const file = event.target.files?.[0];
     if (file) {
-      setPdfFile(file); // Store the selected PDF file
+      setPdfFile(file);
       setFileName(file.name);
-    } else {
-      setFileName("No file chosen");
+      return;
     }
-  };
 
-  const handleSubmit = async () => {
-    // You can send the form data, including the PDF file, to the backend here
+    setPdfFile(null);
+    setFileName("No file chosen");
+  }, []);
+
+  const handleClearFile = useCallback(() => {
+    setPdfFile(null);
+    setFileName("No file chosen");
+  }, []);
+
+  const handleLocationChange = useCallback(({ location, coordinates }) => {
+    setClinicLocation(location);
+    setClinicCoordinates(coordinates);
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
     if (
       !name ||
       !email ||
@@ -115,6 +87,8 @@ const BecomeDoctorForm = () => {
       !pastExperience ||
       !description ||
       !clinicLocation ||
+      !clinicCoordinates?.lat ||
+      !clinicCoordinates?.lng ||
       !treatmentArea.length ||
       !clinicFee ||
       !specialization ||
@@ -123,38 +97,41 @@ const BecomeDoctorForm = () => {
     ) {
       toast({
         title: "Required fields missing",
-        description: "Please fill out all required fields.",
+        description:
+          "Please complete your profile, location, treatment areas, and PDF upload.",
         status: "error",
-        duration: 3000,
+        duration: 3500,
         isClosable: true,
         position: "top",
       });
       return;
     }
+
     const formData = new FormData();
+    const locationForDb = {
+      name: clinicLocation,
+      coordinates: {
+        type: "Point",
+        coordinates: [clinicCoordinates?.lng, clinicCoordinates?.lat],
+      },
+    };
 
     formData.append("name", name);
     formData.append("email", email);
     formData.append("education", education);
     formData.append("experience", experienceYear);
     formData.append("pastExperience", pastExperience);
-
     formData.append("description", description);
-    const locationForDb = {
-      name: clinicLocation, // Subcity, City format
-      coordinates: {
-        type: "Point",
-        coordinates: [clinicCoordinates?.lng, clinicCoordinates?.lat], // [longitude, latitude]
-      },
-    };
-
     formData.append("clinicLocation", JSON.stringify(locationForDb));
     formData.append("specialization", specialization);
-
-    let currTreatmentArea=treatmentArea.map(area=>area.name);
-    formData.append("treatmentArea", JSON.stringify(currTreatmentArea));
+    formData.append(
+      "treatmentArea",
+      JSON.stringify(treatmentArea.map((area) => area.name))
+    );
     formData.append("clinicFee", clinicFee);
-    formData.append("degree", pdfFile); // Attach the PDF file
+    formData.append("degree", pdfFile);
+
+    setIsSubmitting(true);
     try {
       const token = user?.jwt;
       const { data } = await axios.post(
@@ -167,7 +144,8 @@ const BecomeDoctorForm = () => {
           },
         }
       );
-      if (data.success) {
+
+      if (data?.success) {
         toast({
           title: data.message,
           status: "success",
@@ -175,415 +153,212 @@ const BecomeDoctorForm = () => {
           duration: 5000,
           position: "top",
         });
+
         const updatedUser = { ...data.user, jwt: token };
-        setUser(updatedUser); // Update state
-        localStorage.setItem("userInfo", JSON.stringify(updatedUser)); // Sync local storage
+        setUser(updatedUser);
+        localStorage.setItem("userInfo", JSON.stringify(updatedUser));
         navigate("/my-profile/my-info");
-      } else {
-        toast({
-          title: data.message,
-          description: data.subMessage || "Please try again later.",
-          status: "warning",
-          isClosable: true,
-          duration: 5000,
-          position: "top",
-        });
+        return;
       }
+
+      toast({
+        title: data?.message || "Unable to submit application",
+        description: data?.subMessage || "Please try again later.",
+        status: "warning",
+        isClosable: true,
+        duration: 5000,
+        position: "top",
+      });
     } catch (err) {
       toast({
-        title: err.response.data.message,
+        title: err?.response?.data?.message || "Something went wrong",
         description: "Please try again later.",
         status: "error",
         isClosable: true,
         duration: 5000,
         position: "top",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }, [
+    clinicCoordinates?.lat,
+    clinicCoordinates?.lng,
+    clinicFee,
+    clinicLocation,
+    description,
+    education,
+    experienceYear,
+    name,
+    navigate,
+    pastExperience,
+    pdfFile,
+    setUser,
+    specialization,
+    toast,
+    treatmentArea,
+    user?.jwt,
+    email,
+  ]);
 
-  //  get location function
-  const getLocation = async () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-
-          // Store coordinates separately
-          setClinicCoordinates({ lat: latitude, lng: longitude });
-
-          // Reverse Geocoding to get location name
-          const apiKey = "17bcdbc86fda4dfca3ad3328a4ebb4d8";
-          const geocodeUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;
-
-          try {
-            const response = await fetch(geocodeUrl);
-            const data = await response.json();
-
-            if (data.features.length > 0) {
-              const properties = data.features[0].properties;
-              const colony =
-                properties.name ||
-                properties.hamlet ||
-                properties.address_line1 ||
-                properties.neighbourhood ||
-                "Unknown Colony";
-              const city = properties.city || "Unknown City";
-              setClinicLocation(`${colony}, ${city}`); // Store formatted location
-            } else {
-              setClinicLocation("Unknown location");
-            }
-          } catch (error) {
-            console.error("Geocoding error:", error);
-            setClinicLocation("Location not found");
-          }
-
-          // Remove old marker if it exists
-          if (marker.current) marker.current.remove();
-
-          // Add new marker
-          marker.current = new maplibregl.Marker()
-            .setLngLat([longitude, latitude])
-            .addTo(map.current);
-
-          // Move map to user's location
-          map.current.flyTo({
-            center: [longitude, latitude],
-            zoom: 14,
-            speed: 1,
-          });
-        },
-        (error) => {
-          if (error.code === error.PERMISSION_DENIED) {
-            toast({
-              title: "Location Permission Denied",
-              position: "top",
-              description:
-                "Please enable location services in your browser settings.",
-              status: "error",
-              duration: 5000,
-              isClosable: true,
-            });
-          } else {
-            alert("Unable to fetch location. Try again later.");
-          }
-        }
-      );
-    } else {
-      alert("Geolocation is not supported by your browser.");
-    }
-  };
-
-  //  clickable location
-  const updateLocation = async (latitude, longitude) => {
-    setClinicCoordinates({ lat: latitude, lng: longitude });
-
-    // Reverse Geocoding to get Subcity, City
-    const apiKey = "17bcdbc86fda4dfca3ad3328a4ebb4d8";
-    const geocodeUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;
-
-    try {
-      const response = await fetch(geocodeUrl);
-      const data = await response.json();
-
-      if (data.features.length > 0) {
-        const properties = data.features[0].properties;
-        const subcity =
-          properties.name ||
-          properties.hamlet ||
-          properties.address_line1 ||
-          properties.neighbourhood ||
-          "Unknown Colony";
-        const city = properties.city || "Unknown City";
-        setClinicLocation(`${subcity}, ${city}`);
-      } else {
-        setClinicLocation("Unknown Location");
-      }
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      setClinicLocation("Location not found");
-    }
-
-    // Remove old marker if it exists
-    if (marker.current) marker.current.remove();
-
-    // Add new marker at the clicked location
-    marker.current = new maplibregl.Marker()
-      .setLngLat([longitude, latitude])
-      .addTo(map.current);
-
-    // Move map to the new location
-    map.current.flyTo({
-      center: [longitude, latitude],
-      zoom: 14,
-      speed: 1,
-    });
-  };
-
-  // Add click event on the map
-  useEffect(() => {
-    if (map.current) {
-      map.current.on("click", (e) => {
-        const { lng, lat } = e.lngLat;
-        updateLocation(lat, lng);
-      });
-    }
-  }, []);
-let firstTime=true;
   return (
     <>
       <Navbar />
-      <Box
-        minH={"100vh"}
-        w={"100vw"}
-        
-        pt={"55px"}
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"center"}
-        bg={"linear-gradient(to right, #393f4d, #6b707a)"}
+
+      <MotionBox
+        as="main"
+        minH="100vh"
+        w="full"
+        pt={{ base: 20, md: 24 }}
+        pb={{ base: 14, md: 20 }}
+        position="relative"
+        overflow="hidden"
+        bgGradient="linear(135deg, var(--profile-page-bg-start) 0%, var(--profile-page-bg-end) 100%)"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
       >
         <Box
-          w={"clamp(340px,95vw,1000px)"}
-          minH={"85vh"}
-          maxH={"85vh"}
-          display={"flex"}
-          flexDirection={"column"}
-          alignItems={"start"}
-          justifyContent={"start"}
-          p={"20px"}
-          borderRadius={"15px"}
-          gap={"25px"}
-          background={"white"}
-          overflowY={"scroll"}
-          boxShadow={"1px 1px 10px gray"}
-          sx={{
-            "@media(max-width:500px)":{
-              minHeight:"63vh",
-              maxHeight:"63vh"
-            },
-            scrollBehavior: "smooth",
-            "&::-webkit-scrollbar": {
-              width: "0",
-            },
-          }}
-          
-        >
-          <h1 style={{ fontSize: "27px", fontWeight: "500", color: "black" }}>
-           Enter Your Info
-          </h1>
-          <Input
-            type="text"
-            placeholder="name"
-            bg={"white"}
-            p={"5px"}
-            fontSize={"18px"}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Input
-            type="email"
-            placeholder="email"
-            bg={"white"}
-            p={"5px"}
-            fontSize={"18px"}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            type="text"
-            placeholder="Education"
-            bg={"white"}
-            p={"5px"}
-            fontSize={"18px"}
-            value={education}
-            onChange={(e) => setEducation(e.target.value)}
-          />
-          <Input
-            type="text"
-            placeholder="Experience"
-            bg={"white"}
-            p={"5px"}
-            fontSize={"18px"}
-            value={pastExperience}
-            onChange={(e) => setPastExperience(e.target.value)}
-          />
-          <Input
-            type="text"
-            placeholder="Specialization"
-            bg={"white"}
-            p={"5px"}
-            fontSize={"18px"}
-            value={specialization}
-            onChange={(e) => setSpecialization(e.target.value)}
-          />
-          <Textarea
-            type="text"
-            placeholder="Description"
-            bg={"white"}
-            p={"5px"}
-            fontSize={"18px"}
-            value={description}
-            resize={"none"}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <Flex gap={2} mb={3} width={"100%"}>
-            <Input
-              type="text"
-              placeholder="Choose your location in map"
-              bg="white"
-              p="5px"
-              readOnly
-              fontSize="18px"
-              value={clinicLocation}
-              onChange={(e) => setClinicLocation(e.target.value)}
+          position="absolute"
+          top="-140px"
+          right="-70px"
+          w="360px"
+          h="360px"
+          borderRadius="full"
+          bg="rgba(55, 189, 115, 0.16)"
+          filter="blur(90px)"
+          pointerEvents="none"
+        />
+        <Box
+          position="absolute"
+          bottom="-130px"
+          left="-80px"
+          w="340px"
+          h="340px"
+          borderRadius="full"
+          bg="rgba(31, 58, 95, 0.10)"
+          filter="blur(90px)"
+          pointerEvents="none"
+        />
+
+        <Container maxW="7xl" position="relative" zIndex={1}>
+          <Stack spacing={3} mb={{ base: 6, md: 8 }} maxW="3xl">
+            <BackButton
+              label="Back"
+              fallbackTo="/my-profile/my-info"
+              mb={1}
             />
-            <Button colorScheme="blue" onClick={getLocation} minW={"110px"}>
-              Your Location
-            </Button>
-          </Flex>
-          <div
-            ref={mapContainer}
-            style={{ height: "80vh", width: "100%", minHeight: "300px" }}
-          ></div>
-
-          <Box width={"100%"}>
-            <Input
-              type="text"
-              placeholder="Other treatment areas (Press enter after writing one area)"
-              bg={"white"}
-              p={"5px"}
-              fontSize={"18px"}
-              value={currentArea}
-              onChange={(e) => {
-                if(e.target.value.length>30){
-                  if(firstTime){
-                  toast({
-                    title: "Treatment area length must be less than 15 words",
-                    status: "warning",
-                    position: "top",
-                    isClosable: true,
-                    duration: 5000,
-                    max:2
-                  });
-                firstTime=false;}
-                  return;
-                }
-                
-                firstTime=true;
-                setCurrentArea(e.target.value)
-              }}
-              onKeyDown={handleKeydown}
-              width={"100%"}
-            />
-            <Box
-              display={"flex"}
-              gap={"10px"}
-              width={"100%"}
-              flexWrap={"wrap"}
-              marginTop={"10px"}
+            <Badge
+              w="fit-content"
+              px={3}
+              py={1}
+              borderRadius="full"
+              bg="rgba(41, 128, 78, 0.12)"
+              color="var(--primary-green-color)"
+              fontSize="10px"
+              letterSpacing="0.2em"
+              textTransform="uppercase"
+              fontWeight="800"
             >
-              {treatmentArea?.length > 0 &&
-                treatmentArea?.map((s, ind) => {
-                  return (
-                    <Box
-                      padding={"5px"}
-                      bg={"#79bc43"}
-                      borderRadius={"5px"}
-                      color={"white"}
-                      cursor={"pointer"}
-                      key={s.id}
-                      boxSizing="border-box"
-                    >
-                      {s.name}
-                      <button
-                        style={{
-                          marginLeft: "20px",
-                          borderRadius: "50%",
-                          padding: "2px 5px",
-                          background: "white",
-                          color: "black",
-                          fontSize: "10px",
-                          textAlign:"center"
-                        }}
-                        title="Remove this area"
-                        onClick={()=>{
-                          settreatmentArea(prevArea=>prevArea.filter(area=>area.id!==s.id));
-                        }}
-                      >
-                        X
-                      </button>
-                    </Box>
-                  );
-                })}
-            </Box>
-          </Box>
-
-          <Input
-            type="number"
-            value={clinicFee === 0 ? null : clinicFee}
-            onChange={handleChange}
-            placeholder="Clinic fee in dollors (1-30)"
-            bg={"white"}
-            p={"5px"}
-            fontSize={"18px"}
-          />
-
-          <Input
-            type="number"
-            value={experienceYear === 0 ? null : experienceYear}
-            onChange={(e) => {
-              let value = parseInt(e.target.value, 10);
-              // Ensure the value stays within the range
-              if (value < 2) {
-                value = 2;
-              } else if (value > 25) {
-                value = 25;
-              }
-              setExperienceYear(value);
-            }}
-            placeholder="Years of experience (2-25)"
-            bg={"white"}
-            p={"5px"}
-            fontSize={"18px"}
-            min={2}
-            max={25}
-          />
-
-          <Box display={"flex"} gap={"20px"} alignItems={"center"} w={"100%"}>
-            <Button
-              as="label"
-              bg={"#79bc43"}
-              color="white"
-              width={"79%"}
-              borderRadius="md"
-              _hover={{ bg: "#79bc43", cursor: "pointer" }}
+              Doctor onboarding
+            </Badge>
+            <Heading
+              fontSize={{ base: "3xl", md: "4xl", xl: "5xl" }}
+              lineHeight="1.05"
+              color="var(--heading-color)"
+              letterSpacing="-0.04em"
             >
-              Add Your Degree
-              <Input
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-                display="none"
-              />
-            </Button>
-            <Text color={"black"} fontWeight={"500"}>
-              {fileName}
+              Complete your doctor application
+            </Heading>
+            <Text
+              fontSize={{ base: "sm", md: "md" }}
+              color="var(--regular-color)"
+              lineHeight="1.8"
+              maxW="2xl"
+            >
+              Fill in your professional details, pin your clinic on the map,
+              and upload a degree PDF so the review team can verify your
+              application.
             </Text>
-          </Box>
-          <Button
-            bg={"#79bc43"}
-            color="white"
-            borderRadius="md"
-            alignSelf={"center"}
-            fontSize={"20px"}
-            p={"10px"}
-            onClick={handleSubmit}
-            _hover={{ bg: "#79bc43", cursor: "pointer" }}
-          >
-            Submit your application
-          </Button>
-        </Box>
-      </Box>
+            <HStack spacing={2} flexWrap="wrap">
+              {["Profile details", "Map location", "PDF verification"].map(
+                (label) => (
+                  <Badge
+                    key={label}
+                    px={3}
+                    py={1.5}
+                    borderRadius="full"
+                    bg="rgba(255,255,255,0.8)"
+                    color="var(--heading-color)"
+                    border="1px solid rgba(31,58,95,0.08)"
+                    fontSize="xs"
+                    fontWeight="700"
+                  >
+                    {label}
+                  </Badge>
+                )
+              )}
+            </HStack>
+          </Stack>
+
+          <SimpleGrid columns={{ base: 1, xl: 2 }} gap={6} alignItems="start">
+            <Stack spacing={6}>
+              <PersonalDetailsSection
+                name={name}
+                setName={setName}
+                email={email}
+                setEmail={setEmail}
+              />
+
+              <ProfessionalDetailsSection
+                education={education}
+                setEducation={setEducation}
+                pastExperience={pastExperience}
+                setPastExperience={setPastExperience}
+                specialization={specialization}
+                setSpecialization={setSpecialization}
+                clinicFee={clinicFee}
+                setClinicFee={setClinicFee}
+                experienceYear={experienceYear}
+                setExperienceYear={setExperienceYear}
+                description={description}
+                setDescription={setDescription}
+              />
+
+              <TreatmentAreaSection
+                treatmentArea={treatmentArea}
+                setTreatmentArea={setTreatmentArea}
+                currentArea={currentArea}
+                setCurrentArea={setCurrentArea}
+              />
+
+              <DegreeUploadSection
+                fileName={fileName}
+                onFileChange={handleFileChange}
+                onClearFile={handleClearFile}
+              />
+            </Stack>
+
+            <Stack
+              spacing={6}
+              alignSelf="start"
+              position={{ xl: "sticky" }}
+              top={{ xl: "96px" }}
+            >
+              <ClinicMapSection
+                clinicLocation={clinicLocation}
+                clinicCoordinates={clinicCoordinates}
+                onLocationChange={handleLocationChange}
+              />
+              <ApplicationChecklist />
+              <SubmitActionSection
+                onSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+              />
+            </Stack>
+          </SimpleGrid>
+        </Container>
+      </MotionBox>
     </>
   );
 };
