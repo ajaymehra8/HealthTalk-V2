@@ -22,7 +22,7 @@ import Logo from "../Logo/Logo";
 const MotionBox = motion(Box);
 
 const NAV_ITEMS = [
-  { label: "Find Doctors", action: "login", icon: FiSearch },
+  { label: "Find Doctors", action: "#doctors", icon: FiSearch },
   { label: "Apply as Doctor", action: "/doctor/form", icon: FiUserPlus },
 ];
 
@@ -46,7 +46,12 @@ const actionButtonStyles = {
   transition: "all 0.2s ease",
 };
 
-const DesktopNavButton = ({ icon: Icon, onClick, children, ...buttonProps }) => (
+const DesktopNavButton = ({
+  icon: Icon,
+  onClick,
+  children,
+  ...buttonProps
+}) => (
   <Button
     variant="ghost"
     onClick={onClick}
@@ -158,8 +163,14 @@ const Navbar = () => {
 
   const goToLogin = () => {
     onClose();
-    navigate("/login");
+    navigate("#doctors");
   };
+
+  const scrollToDoctors = React.useCallback(() => {
+    const target = document.getElementById("doctors");
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const goToSignup = () => {
     onClose();
@@ -200,7 +211,7 @@ const Navbar = () => {
             <Logo />
 
             <HStack display={{ base: "none", lg: "flex" }} spacing={2}>
-              <DesktopNavButton icon={FiSearch} onClick={goToLogin}>
+              <DesktopNavButton icon={FiSearch} onClick={scrollToDoctors}>
                 Find Doctors
               </DesktopNavButton>
               <DesktopNavButton icon={FiUserPlus} onClick={goToDoctorForm}>
@@ -225,8 +236,12 @@ const Navbar = () => {
 
             <IconButton
               display={{ base: "inline-flex", lg: "none" }}
-              aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-              icon={isOpen ? <RxCross2 size={20} /> : <RxHamburgerMenu size={20} />}
+              aria-label={
+                isOpen ? "Close navigation menu" : "Open navigation menu"
+              }
+              icon={
+                isOpen ? <RxCross2 size={20} /> : <RxHamburgerMenu size={20} />
+              }
               onClick={onToggle}
               h="44px"
               w="44px"
@@ -293,8 +308,8 @@ const Navbar = () => {
                             item.action === "login"
                               ? goToLogin
                               : item.action === "/doctor/form"
-                              ? goToDoctorForm
-                              : onClose
+                                ? goToDoctorForm
+                                : onClose
                           }
                         >
                           {item.label}
