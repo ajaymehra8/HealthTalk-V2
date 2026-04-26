@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Avatar,
   Box,
@@ -22,7 +21,7 @@ import Logo from "../Logo/Logo";
 const MotionBox = motion(Box);
 
 const NAV_ITEMS = [
-  { label: "Find Doctors", action: "#doctors", icon: FiSearch },
+  { label: "Find Doctors", action: "/doctors", icon: FiSearch },
   { label: "Apply as Doctor", action: "/doctor/form", icon: FiUserPlus },
 ];
 
@@ -166,11 +165,10 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  const scrollToDoctors = React.useCallback(() => {
-    const target = document.getElementById("doctors");
-    if (!target) return;
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
+  const goToDoctors = () => {
+    onClose();
+    navigate("/doctors");
+  };
 
   const goToSignup = () => {
     onClose();
@@ -211,7 +209,7 @@ const Navbar = () => {
             <Logo />
 
             <HStack display={{ base: "none", lg: "flex" }} spacing={2}>
-              <DesktopNavButton icon={FiSearch} onClick={scrollToDoctors}>
+              <DesktopNavButton icon={FiSearch} onClick={goToDoctors}>
                 Find Doctors
               </DesktopNavButton>
               <DesktopNavButton icon={FiUserPlus} onClick={goToDoctorForm}>
@@ -300,22 +298,26 @@ const Navbar = () => {
                   backdropFilter="blur(20px)"
                 >
                   <Stack spacing={4}>
-                    <Stack spacing={3} alignItems={"center"}>
-                      {NAV_ITEMS.map((item) => (
-                        <MobileNavButton
-                          key={item.label}
-                          icon={item.icon}
-                          onClick={
-                            item.action === "login"
-                              ? goToLogin
-                              : item.action === "/doctor/form"
-                                ? goToDoctorForm
-                                : onClose
+                  <Stack spacing={3} alignItems={"center"}>
+                    {NAV_ITEMS.map((item) => (
+                      <MobileNavButton
+                        key={item.label}
+                        icon={item.icon}
+                        onClick={() => {
+                          if (item.action === "/doctors") {
+                            goToDoctors();
+                            return;
                           }
-                        >
-                          {item.label}
-                        </MobileNavButton>
-                      ))}
+                          if (item.action === "/doctor/form") {
+                            goToDoctorForm();
+                            return;
+                          }
+                          onClose();
+                        }}
+                      >
+                        {item.label}
+                      </MobileNavButton>
+                    ))}
                     </Stack>
 
                     <Divider borderColor="rgba(31,58,95,0.10)" />
