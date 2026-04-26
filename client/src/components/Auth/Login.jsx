@@ -42,7 +42,7 @@ const Login = () => {
     try {
       if (authResult?.code) {
         const result = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/v1/user/google-auth?code=${authResult?.code}`
+          `${process.env.REACT_APP_API_URL}/api/v1/user/google-auth?code=${authResult?.code}`,
         );
         if (result.data.success) {
           const obj = { ...result?.data?.user, jwt: result?.data?.token };
@@ -168,9 +168,13 @@ const Login = () => {
               type="button"
               variant="unstyled"
               width="100%"
-              height="54px"
-              minHeight="54px"
-              borderRadius="16px"
+              height="44px"
+              minHeight="44px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              gap="10px"
+              borderRadius="12px"
               border="1px solid"
               borderColor="var(--border-soft-color)"
               bg="linear-gradient(180deg, var(--surface-color), var(--surface-muted-color))"
@@ -183,7 +187,7 @@ const Login = () => {
                 boxShadow: "0 18px 32px rgba(31, 58, 95, 0.12)",
                 borderColor: "rgba(41, 128, 78, 0.25)",
               }}
-              leftIcon={<FcGoogle size={22} />}
+              leftIcon={<FcGoogle size={20} />}
             >
               Continue with Google
             </Button>
@@ -222,9 +226,9 @@ const Login = () => {
               loadingText="Wait..."
               isDisabled={loading}
               width="100%"
-              height="54px"
-              minHeight="54px"
-              borderRadius="16px"
+              height="44px"
+              minHeight="44px"
+              borderRadius="12px"
               border="none"
               bg="linear-gradient(135deg, var(--primary-green-color), var(--auth-panel-end))"
               color="var(--surface-color)"

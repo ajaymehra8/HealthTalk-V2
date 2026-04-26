@@ -1,321 +1,300 @@
-import React, { useRef } from "react";
-import { Box, Avatar } from "@chakra-ui/react";
+import React from "react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  Stack,
+  Text,
+  useBreakpointValue,
+  useToast,
+} from "@chakra-ui/react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthState } from "../context/AuthProvider";
-import { useNavigate } from "react-router-dom";
-import { NavLink } from "react-router-dom";
+import { motion } from "framer-motion";
+import { FiLogOut } from "react-icons/fi";
+import { RxCross2, RxHamburgerMenu } from "react-icons/rx";
 
-const ProfSideBar = ({ imageSrc, setImageSrc, imageFile, setImageFile }) => {
-  const { user, show, setShow } = useAuthState();
+const roleNavItems = {
+  user: [
+    { to: "my-info", icon: "bi bi-info-circle-fill", label: "Your Info" },
+    { to: "my-reviews", icon: "bi bi-star-fill", label: "Reviews" },
+    {
+      to: "my-appoinment",
+      icon: "fas fa-user-md",
+      label: "Appointed Doctors",
+    },
+  ],
+  admin: [
+    { to: "my-info", icon: "bi bi-info-circle-fill", label: "Your Info" },
+    {
+      to: "approvals",
+      icon: "bi bi-person-plus-fill",
+      label: "Pending Approvals",
+    },
+    {
+      to: "reports",
+      icon: "bi bi-exclamation-circle-fill",
+      label: "User Reports",
+    },
+    { to: "all-doctors", icon: "fas fa-user-md", label: "All Doctors" },
+  ],
+  doctor: [
+    { to: "my-info", icon: "bi bi-info-circle-fill", label: "Your Info" },
+    {
+      to: "appoinments",
+      icon: "bi bi-person-plus-fill",
+      label: "Pending Appoinments",
+    },
+    { to: "my-reviews", icon: "bi bi-star-fill", label: "My Reviews" },
+    { to: "earning", icon: "fas fa-user-md", label: "Earning" },
+  ],
+};
+
+const MotionBox = motion(Box);
+
+const ProfSideBar = ({ topOffset = 66 }) => {
+  const { user, show, setShow, setUser } = useAuthState();
   const navigate = useNavigate();
+  const toast = useToast();
+  const handleButtonLeft = useBreakpointValue({
+    base: show ? "calc(clamp(250px, 78vw, 320px) - 108px)" : "12px",
+    lg: "calc(22% - 108px)",
+  });
 
-  const fileInputRef = useRef(null); // Create a reference for the input
-
-  // Handle file input change
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setImageFile(file); // Store the actual file
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageSrc(reader.result); // Set the image as a base64 URL
-      };
-      reader.readAsDataURL(file); // Read the file as a data URL
-    }
-  };
-
-  // Trigger the input click when Avatar is clicked
-  const handleAvatarClick = () => {
-    fileInputRef.current.click(); // Simulate input click
-  };
-
-  const handleApplication = async () => {
-    navigate("/doctor/form");
-  };
   const changeShow = () => {
     setShow(false);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("userInfo");
+    setUser(null);
+    setShow(false);
+    navigate("/");
+    toast({
+      title: "Log out successfully",
+      position: "top",
+      status: "success",
+      isClosable: true,
+      duration: 10000,
+    });
+  };
+
+  const displayName = user?.name
+    ? `${user.name.charAt(0).toUpperCase()}${user.name
+        .slice(1)
+        .toLowerCase()}`
+    : "Profile";
+
+  const navItems = roleNavItems[user?.role] || [];
+
   return (
     <>
-      <div
-        className="usResBtn"
-        style={{
-          position: "absolute",
-          left: !show ? "-40px" : "clamp(220px, 50%, 260px)",
+      <Button
+        display={{ base: "flex", lg: "none" }}
+        position="fixed"
+        top={`calc(${topOffset}px + 16px)`}
+        left={handleButtonLeft}
+        zIndex={1110}
+        aria-label={show ? "Close profile menu" : "Open profile menu"}
+        leftIcon={show ? <RxCross2 size={18} /> : <RxHamburgerMenu size={18} />}
+        h="48px"
+        minW="96px"
+        px={4}
+        borderRadius="full"
+        bg="rgba(255, 255, 255, 0.92)"
+        color="var(--heading-color)"
+        border="1px solid var(--border-soft-color)"
+        boxShadow="0 18px 32px rgba(31, 58, 95, 0.14)"
+        backdropFilter="blur(16px)"
+        transition="transform 0.25s ease, box-shadow 0.25s ease, left 0.35s ease, background 0.25s ease"
+        _hover={{
+          transform: "translateY(-2px)",
+          boxShadow: "0 24px 38px rgba(31, 58, 95, 0.18)",
+          bg: "rgba(255, 255, 255, 0.98)",
         }}
-        onClick={() => {
-          setShow(!show);
-        }}
-      ></div>
-      <Box
-        className="userCard"
-        flexDir={"column"}
-        w={"22%"}
-        minH={"100vh"}
-        borderRight={"2px solid white"}
-        boxShadow="5px 0 25px -10px rgba(0, 0, 0, 0.5)" // Shadow on the right side
-        position={"fixed" }
-        left={{base:!show ? "-80%" : "0",lg:0}}
-        
-        top={'0'}
-        pt={"70px"}
-        z-index={1000}
-        shadow={{base:"0px 10px 30px rgba(0, 0, 0, 0.3)",lg:"none"}}
-        sx={{
-          "@media(max-width:950px)": {
-            width: "clamp(250px,60%,300px)",
-            
-            border: "none",
-          },
-          "@media(max-width:500px)": {
-            top:0,
-         
-          },
-        }}
+        onClick={() => setShow((prev) => !prev)}
       >
-        <Box className="flexBox" flexDir={"column"} gap={"10px"} right={0}>
-          <div
-            style={{
-              position: "relative",
-              width: "fit-content", // To ensure the div wraps around the avatar
-            }}
-            className="profMain"
+        {show ? "Close" : "Menu"}
+      </Button>
+
+      <Box
+        display={{ base: show ? "block" : "none", lg: "none" }}
+        position="fixed"
+        top={`${topOffset}px`}
+        left={0}
+        right={0}
+        bottom={0}
+        bg="rgba(9, 18, 31, 0.26)"
+        backdropFilter="blur(4px)"
+        zIndex={990}
+        onClick={() => setShow(false)}
+      />
+
+      <MotionBox
+        position="fixed"
+        top={`${topOffset}px`}
+        left={0}
+        w={{ base: "clamp(250px, 78vw, 320px)", lg: "22%" }}
+        h={`calc(100vh - ${topOffset}px)`}
+        pt={6}
+        px={5}
+        pb={5}
+        zIndex={1000}
+        bgGradient="linear(160deg, var(--auth-panel-start) 0%, var(--auth-panel-mid) 46%, var(--auth-panel-end) 100%)"
+        color="var(--profile-sidebar-text)"
+        borderRight="1px solid var(--profile-sidebar-card-border)"
+        boxShadow={{
+          base: "0 20px 50px rgba(12, 24, 39, 0.42)",
+          lg: "8px 0 30px rgba(12, 24, 39, 0.18)",
+        }}
+        backdropFilter="blur(20px)"
+        overflowY="auto"
+        transform={{
+          base: show ? "translateX(0)" : "translateX(-104%)",
+          lg: "translateX(0)",
+        }}
+        transition="transform 0.35s ease, box-shadow 0.35s ease"
+      >
+        <Stack spacing={5} align="stretch">
+          <Box
+            role="group"
+            display="flex"
+            flexDir="column"
+            alignItems="center"
+            gap={3}
           >
-            <Avatar
-              src={imageSrc || user?.image}
-              size={"2xl"}
-              onClick={handleAvatarClick} // Avatar click handler
-              cursor="pointer" // Show pointer cursor to indicate it's clickable
-
-            />
-
             <Box
-              height={"128px"}
-              width={"128px"}
-              borderRadius={"50%"}
-              position={"absolute"}
-              top={"0"}
-              background={"rgba(0, 0, 0, 0.5)"} // Set background with opacity
-              display={"flex"}
-              alignItems={"center"}
-              justifyContent={"center"}
-              pointerEvents="none" // Prevent interaction when hidden
-              transition="opacity 0.3s ease, transform 0.3s ease" // Smooth animation
-              transform="scale(0.9)" // Start smaller for animation effect
-              style={{
-                pointerEvents: "none",
-              }}
-              className="hoverBox"
+              position="relative"
+              w="fit-content"
+              p="1.5"
+              borderRadius="full"
+              bg="rgba(255, 255, 255, 0.08)"
             >
-              <h5
-                style={{
-                  letterSpacing: "1px",
-                  fontWeight: "500",
-                  fontSize: "20px",
-                  color: "white",
-                }}
-              >
-                Edit
-              </h5>
+              <Avatar
+                src={user?.image || ""}
+                name={user?.name || "Anonymous Member"}
+                size="2xl"
+                bg="var(--profile-sidebar-accent-bg)"
+                color="white"
+                border="4px solid rgba(255, 255, 255, 0.14)"
+                boxShadow="0 18px 34px rgba(12, 24, 39, 0.22)"
+              />
             </Box>
 
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef} // Connect the input with the ref
-              style={{ display: "none" }} // Hide the input field
-              onChange={handleImageChange}
-            />
-          </div>
-
-          <Box className="flexBox" flexDir={"column"} color={"white"}>
-            <h1 style={{ fontSize: "20px", letterSpacing: "1px" }}>
-              {user?.name?.charAt(0).toUpperCase() +
-                user?.name?.slice(1).toLowerCase()}
-            </h1>
-            <h1 style={{ color: "rgb(223, 214, 214)", letterSpacing: "1px",maxWidth:"100%" }}>
-              {user?.email}
-            </h1>
-            {user?.role === "user" && (
-              <>
-                <ul className="profUl">
-                  <li className="profLi">
-                    <NavLink
-                      to="my-info"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      {" "}
-                      <i className="bi bi-info-circle-fill profIcon"></i> Your
-                      Info
-                    </NavLink>
-                  </li>
-
-                  <li className="profLi">
-                    <NavLink
-                      to="my-reviews"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      <i className="bi bi-star-fill profIcon"></i> Reviews
-                    </NavLink>
-                  </li>
-                  <li className="profLi">
-                    <NavLink
-                      to="my-appoinment"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      <i className="fas fa-user-md profIcon"></i> Appointed
-                      Doctors
-                    </NavLink>
-                  </li>
-                  {user?.status && (
-                    <li className="profLi">
-                      {user?.status === "In process" && (
-                        <i className="bi bi-hourglass-split profIcon"></i>
-                      )}
-                      Your request in queue
-                    </li>
-                  )}
-                </ul>
-                {!user?.status && (
-                  <button
-                    className="defaultBtn profBtn"
-                    onClick={handleApplication}
-                    style={{
-                      background: "#78be10",
-                      border: "none",
-                      color: "white",
-                      marginTop: "25px",
-                    }}
-                  >
-                    Become a doctor
-                  </button>
-                )}
-              </>
-            )}
-            {user?.role === "admin" && (
-              <>
-                <ul className="profUl">
-                  <li className="profLi">
-                    <NavLink
-                      to="my-info"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      <i className="bi bi-info-circle-fill profIcon"></i> Your
-                      Info
-                    </NavLink>
-                  </li>
-
-                  <li className="profLi">
-                    <NavLink
-                      to="approvals"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      <i className="bi bi-person-plus-fill profIcon"></i>{" "}
-                      Pending Approvals
-                    </NavLink>
-                  </li>
-
-                  <li className="profLi">
-                  <NavLink
-                      to="reports"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                    <i className="bi bi-exclamation-circle-fill profIcon"></i>{" "}
-                    User Reports
-                    </NavLink>
-                  </li>
-
-                  <li className="profLi">
-                  <NavLink
-                      to="all-doctors"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                    <i className="fas fa-user-md profIcon"></i> All Doctors
-                    </NavLink>
-                  </li>
-                </ul>
-              </>
-            )}
-
-            {user?.role === "doctor" && (
-              <>
-                <ul className="profUl">
-                  <li className="profLi">
-                    <NavLink
-                      to="my-info"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      <i className="bi bi-info-circle-fill profIcon"></i> Your
-                      Info
-                    </NavLink>
-                  </li>
-
-                  <li className="profLi">
-                    <NavLink
-                      to="appoinments"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      <i className="bi bi-person-plus-fill profIcon"></i>{" "}
-                      Pending Appoinments
-                    </NavLink>
-                  </li>
-
-                  <li className="profLi">
-                    <NavLink
-                      to="my-reviews"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      <i class="bi bi-star-fill"></i> My Reviews
-                    </NavLink>
-                  </li>
-
-                  <li className="profLi">
-                    <NavLink
-                      to="earning"
-                      className={({ isActive }) =>
-                        isActive ? "active-link profLi" : "profLi"
-                      }
-                      onClick={changeShow}
-                    >
-                      <i className="fas fa-user-md profIcon"></i> Earning
-                    </NavLink>
-                  </li>
-                </ul>
-              </>
-            )}
+            <Stack spacing={1} align="center" textAlign="center" w="full">
+              <Text
+                fontSize="lg"
+                fontWeight="700"
+                letterSpacing="0.02em"
+                noOfLines={1}
+              >
+                {displayName}
+              </Text>
+              <Text
+                fontSize="sm"
+                color="var(--profile-sidebar-text-muted)"
+                noOfLines={2}
+              >
+                {user?.email}
+              </Text>
+            </Stack>
           </Box>
-        </Box>
-      </Box>
+
+          {user?.role === "user" && user?.status && (
+            <Box
+              p={3}
+              borderRadius="16px"
+              bg="var(--profile-sidebar-card-bg)"
+              border="1px solid var(--profile-sidebar-card-border)"
+            >
+              <Box display="flex" alignItems="center" gap={2}>
+                {user?.status === "In process" && (
+                  <Box as="i" className="bi bi-hourglass-split" />
+                )}
+                <Text as="span" fontSize="sm" fontWeight="600" color="white">
+                  Your request in queue
+                </Text>
+              </Box>
+            </Box>
+          )}
+
+          <Stack as="nav" spacing={3} w="full">
+            {navItems.map((item) => (
+              <Box
+                key={item.to}
+                as={NavLink}
+                to={item.to}
+                onClick={changeShow}
+                display="flex"
+                alignItems="center"
+                gap={3}
+                w="full"
+                px={4}
+                py={3}
+                borderRadius="16px"
+                border="1px solid"
+                borderColor="transparent"
+                textDecoration="none"
+                fontSize="15px"
+                fontWeight="600"
+                transition="transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease"
+                _hover={{
+                  transform: "translateX(3px)",
+                  bg: "var(--profile-sidebar-hover-bg)",
+                  color: "var(--profile-sidebar-text)",
+                }}
+                style={({ isActive }) => ({
+                  background: isActive
+                    ? "var(--profile-sidebar-active-bg)"
+                    : "transparent",
+                  color: isActive
+                    ? "var(--profile-sidebar-text)"
+                    : "var(--profile-sidebar-text-muted)",
+                  borderColor: isActive
+                    ? "var(--profile-sidebar-card-border)"
+                    : "transparent",
+                  boxShadow: isActive
+                    ? "inset 0 0 0 1px rgba(255,255,255,0.08)"
+                    : "none",
+                })}
+              >
+                <Box
+                  as="i"
+                  className={item.icon}
+                  fontSize="15px"
+                  flexShrink={0}
+                />
+                <Text>{item.label}</Text>
+              </Box>
+            ))}
+          </Stack>
+
+          <Box pt={2}>
+            <Divider borderColor="var(--profile-sidebar-card-border)" mb={4} />
+            <Button
+              onClick={handleLogout}
+              w="full"
+              h="46px"
+              borderRadius="16px"
+              bg="linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)"
+              color="white"
+              border="1px solid rgba(248, 113, 113, 0.28)"
+              boxShadow="0 18px 30px rgba(239, 68, 68, 0.24)"
+              fontWeight="800"
+              _hover={{
+                bg: "linear-gradient(135deg, #f87171 0%, #dc2626 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 22px 34px rgba(239, 68, 68, 0.28)",
+              }}
+              transition="all 0.2s ease"
+              leftIcon={<FiLogOut />}
+            >
+              Logout
+            </Button>
+          </Box>
+        </Stack>
+      </MotionBox>
     </>
   );
 };

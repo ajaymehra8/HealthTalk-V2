@@ -53,6 +53,20 @@
   --scrollbar-thumb-color: #86a894;
   --scrollbar-thumb-hover-color: #5f8571;
   --scrollbar-thumb-border-color: #edf3f8;
+  --profile-page-bg-start: #edf4fb;
+  --profile-page-bg-end: #f7fbfd;
+  --profile-shell-bg: rgba(255, 255, 255, 0.84);
+  --profile-shell-border: rgba(255, 255, 255, 0.82);
+  --profile-sidebar-start: #172f49;
+  --profile-sidebar-mid: #1d3a5e;
+  --profile-sidebar-end: #1b6b41;
+  --profile-sidebar-text: #ffffff;
+  --profile-sidebar-text-muted: rgba(255, 255, 255, 0.78);
+  --profile-sidebar-card-bg: rgba(255, 255, 255, 0.1);
+  --profile-sidebar-card-border: rgba(255, 255, 255, 0.14);
+  --profile-sidebar-active-bg: rgba(255, 255, 255, 0.16);
+  --profile-sidebar-hover-bg: rgba(255, 255, 255, 0.1);
+  --profile-sidebar-accent-bg: rgba(55, 189, 115, 0.18);
 
   --page-padding-x: 70px;
   --page-padding-y: 96px;
