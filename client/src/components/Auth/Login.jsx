@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Box, Button, useToast } from "@chakra-ui/react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { login } from "../../Api/Auth";
 import { useAuthState } from "../../context/AuthProvider";
 import Sidebar from "./Sidebar";
@@ -12,6 +12,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
 import Typography from "../ui/Typography";
 import AuthField from "./AuthField";
+import BackButton from "../Common/BackButton";
 import "./Auth.css";
 
 const Login = () => {
@@ -23,20 +24,12 @@ const Login = () => {
   const emailRef = useRef(null);
   const toast = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from || "/";
 
   useEffect(() => {
     emailRef.current?.focus();
   }, []);
-
-  useEffect(() => {
-    window.onpopstate = () => {
-      navigate("/");
-    };
-
-    return () => {
-      window.onpopstate = null;
-    };
-  }, [navigate]);
 
   const responseGoogle = async (authResult) => {
     try {
@@ -56,7 +49,7 @@ const Login = () => {
             duration: 5000,
             position: "top",
           });
-          navigate("/");
+          navigate(redirectTo, { replace: true });
         }
       }
     } catch (err) {
@@ -95,7 +88,7 @@ const Login = () => {
           duration: 5000,
           position: "top",
         });
-        navigate("/");
+        navigate(redirectTo, { replace: true });
       }
     } catch (error) {
       toast({
@@ -126,6 +119,13 @@ const Login = () => {
           transition={{ duration: 0.65, ease: "easeOut", delay: 0.05 }}
         >
           <Box className="auth-card__inner">
+            <BackButton
+              label="Back"
+              to={redirectTo}
+              fallbackTo="/"
+              mb={2}
+            />
+
             <Box className="auth-brand">
               <Logo
                 style={{
@@ -158,7 +158,11 @@ const Login = () => {
 
             <Box className="auth-linkRow">
               <span>Don't have an account?</span>
-              <NavLink to="/signup" className="auth-link">
+              <NavLink
+                to="/signup"
+                state={{ from: redirectTo }}
+                className="auth-link"
+              >
                 Create one
               </NavLink>
             </Box>

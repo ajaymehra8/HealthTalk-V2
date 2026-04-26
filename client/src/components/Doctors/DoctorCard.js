@@ -11,39 +11,29 @@ import {
 import { HStack } from "@chakra-ui/react";
 import Typography from "../ui/Typography";
 import { useNavigate } from "react-router-dom";
-import { useAuthState } from "../../context/AuthProvider";
 import axios from "axios";
+import { useProtectedRoute } from "../../hooks/useProtectedRoute";
 
-const DoctorCard = ({ doctor, handleFunction }) => {
+const DoctorCard = ({ doctor }) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [bookLoading, setBookLoading] = useState(false);
-  const { user } = useAuthState();
+  const { currentUser, requireAuth } = useProtectedRoute();
 
   const toast = useToast();
 
-  const handleViewProfile = async () => {
-    setLoading(true);
-    const doctorProf = await handleFunction(); // Assume this function fetches the doctor's profile data
-    setLoading(false);
-    navigate("/doctor-profile", { state: { user: doctorProf } }); // Pass the profile data using `state`
+  const handleViewProfile = () => {
+    if (!doctor?._id) return;
+    navigate(`/doctor-profile/${doctor._id}`);
   };
 
   const bookAppoinment = async (e) => {
     e.stopPropagation();
-    if (!user) {
-      return toast({
-        title: "You are not logged in",
-        status: "error",
-        isClosable: true,
-        duration: 5000,
-        position: "top",
-      });
-    }
+    if (!requireAuth()) return;
+
     const body = {
       doctor,
     };
-    const token = user?.jwt;
+    const token = currentUser?.jwt;
     setBookLoading(true);
     const headers = {
       "Content-Type": "application/json",

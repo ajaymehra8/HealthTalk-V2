@@ -55,7 +55,7 @@ const AppoinmentCard = ({
 
   const openDoctorProfile = () => {
     if (!doctor?._id) return;
-    navigate("/doctor-profile", { state: { user: doctor } });
+    navigate(`/doctor-profile/${doctor._id}`);
   };
 
   const handleDoctorKeyDown = (event) => {

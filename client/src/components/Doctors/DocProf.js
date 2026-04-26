@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
@@ -8,7 +8,9 @@ import {
   SimpleGrid,
   Stack,
   Text,
+  Spinner,
 } from "@chakra-ui/react";
+import axios from "axios";
 import { motion } from "framer-motion";
 import {
   FiArrowLeft,
@@ -18,7 +20,7 @@ import {
   FiLayers,
   FiMapPin,
 } from "react-icons/fi";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../Navbar/Navbar";
 import DoctorProf1 from "./DoctorProfile/DoctorProf1";
 import Footer from "../Footer";
@@ -122,10 +124,63 @@ const SectionCard = ({ eyebrow, title, children, delay = 0 }) => (
 );
 
 const DocProf = () => {
-  const { state } = useLocation();
+  const { doctorId } = useParams();
   const navigate = useNavigate();
-  const doctor = state?.user;
+  const [doctor, setDoctor] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchDoctor = async () => {
+      if (!doctorId) {
+        if (isActive) {
+          setDoctor(null);
+          setFetchError("Open a doctor card to view the profile.");
+          setLoading(false);
+        }
+        return;
+      }
+
+      setLoading(true);
+      setFetchError("");
+
+      try {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/v1/user/${doctorId}`
+        );
+
+        const fetchedDoctor = data?.doctor || data?.user || data?.data || null;
+
+        if (!isActive) return;
+
+        setDoctor(fetchedDoctor);
+        if (!fetchedDoctor) {
+          setFetchError("Doctor profile is not available right now.");
+        }
+      } catch (error) {
+        if (!isActive) return;
+
+        setDoctor(null);
+        setFetchError(
+          error?.response?.data?.message ||
+            "Unable to load this doctor profile right now."
+        );
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchDoctor();
+
+    return () => {
+      isActive = false;
+    };
+  }, [doctorId]);
 
   const fullText =
     doctor?.description ||
@@ -140,6 +195,46 @@ const DocProf = () => {
     () => formatList(doctor?.treatmentArea),
     [doctor?.treatmentArea]
   );
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <Box
+          position="relative"
+          minH="100vh"
+          w="full"
+          overflow="hidden"
+          pt={`${DOCTOR_PROFILE_OFFSET}px`}
+          bgGradient="linear(135deg, var(--profile-page-bg-start) 0%, var(--page-background-color) 50%, var(--profile-page-bg-end) 100%)"
+        >
+          <Container maxW="980px" px={{ base: 4, md: 6, xl: 8 }} py={8}>
+            <MotionBox
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              p={{ base: 6, md: 8 }}
+              borderRadius="28px"
+              bg="linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,251,253,0.92))"
+              border="1px solid rgba(31, 58, 95, 0.08)"
+              boxShadow="0 24px 54px rgba(31, 58, 95, 0.08)"
+            >
+              <Stack spacing={4} align="center" textAlign="center">
+                <Spinner size="xl" color="var(--primary-green-color)" thickness="3px" />
+                <Text fontSize="xl" fontWeight="800" color="var(--heading-color)">
+                  Loading doctor profile...
+                </Text>
+                <Text fontSize="sm" color="var(--regular-color)" lineHeight="1.7">
+                  We are fetching the latest profile details.
+                </Text>
+              </Stack>
+            </MotionBox>
+          </Container>
+        </Box>
+        <Footer />
+      </>
+    );
+  }
 
   if (!doctor) {
     return (
@@ -189,8 +284,8 @@ const DocProf = () => {
                   Profile not available
                 </Text>
                 <Text fontSize="sm" color="var(--regular-color)" lineHeight="1.7">
-                  Open a doctor card, review, or appointment entry to view the
-                  full profile with booking and feedback options.
+                  {fetchError ||
+                    "Open a doctor card, review, or appointment entry to view the full profile with booking and feedback options."}
                 </Text>
                 <Button
                   onClick={() => navigate(-1)}

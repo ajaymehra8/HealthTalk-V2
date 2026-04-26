@@ -4,17 +4,15 @@ import {
   Button,
   Flex,
   Text,
-  useToast,
 } from "@chakra-ui/react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ReviewCard from "../../Reviews/ReviewCard";
-import { useAuthState } from "../../../context/AuthProvider";
+import { useProtectedRoute } from "../../../hooks/useProtectedRoute";
 
 const ReviewPanel = ({ doctor }) => {
   const navigate = useNavigate();
-  const { user } = useAuthState();
-  const toast = useToast();
+  const { requireAuth } = useProtectedRoute();
   return (
     <Box
       w="100%"
@@ -100,25 +98,14 @@ const ReviewPanel = ({ doctor }) => {
         </Text>
         <Button
           onClick={() => {
-            if (user?.role !== "user") {
-              return toast({
-                title: "You are not allowed to do this action.",
-                status: "error",
-                isClosable: true,
-                duration: 5000,
-                position: "top",
-              });
-            }
-            if (!user) {
-              return toast({
-                title: "You are not logged in",
-                status: "error",
-                isClosable: true,
-                duration: 5000,
-                position: "top",
-              });
-            }
-            navigate("/doctor/review", { state: { user: doctor } });
+            requireAuth(
+              () => navigate(`/doctor/review/${doctor?._id}`),
+              {
+                allowedRoles: ["user"],
+                unauthorizedMessage: "You are not allowed to do this action.",
+                unauthorizedRedirect: "/",
+              }
+            );
           }}
           h="44px"
           minW={{ base: "full", md: "140px" }}

@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, HStack, useToast } from "@chakra-ui/react";
+import { Box, HStack } from "@chakra-ui/react";
 import axios from "axios";
 import { useAuthState } from "../../../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 
 const DoctorCard = ({ doctor, setDoctors }) => {
-  const toast = useToast();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [appoinmentCount, setAppoinmentCount] = useState(0);
   const { headers } = useAuthState();
 
@@ -26,22 +24,14 @@ const DoctorCard = ({ doctor, setDoctors }) => {
     } catch (error) {
       console.error("Error fetching appointments:", error.message);
     }
-  }, [headers]);
+  }, [headers, doctor?._id]);
 
   useEffect(() => {
     fetchAppoinments();
   }, [fetchAppoinments]);
-  const handleFunction = async () => {
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/api/v1/user/${doctor?._id}`
-    );
-    return data.doctor;
-  };
-  const handleViewProfile = async () => {
-    setLoading(true);
-    const doctorProf = await handleFunction(); // Assume this function fetches the doctor's profile data
-    setLoading(false);
-    navigate("/doctor-profile", { state: { user: doctorProf } }); // Pass the profile data using `state`
+  const handleViewProfile = () => {
+    if (!doctor?._id) return;
+    navigate(`/doctor-profile/${doctor._id}`);
   };
 
   return (
@@ -112,17 +102,13 @@ const DoctorCard = ({ doctor, setDoctors }) => {
           className=" rounded-btn"
           style={{
             marginTop: "20px",
-            background: loading && "gray",
-            borderColor: loading && "gray",
-            backgroundColor: !loading ? "#78be20" : "gray",
+            backgroundColor: "#78be20",
             color: "white",
+            letterSpacing: "1px",
           }}
-          onClick={!loading ? handleViewProfile : undefined}
-          disabled={loading}
-          cursor={loading && "not-allowed"}
-          letterSpacing={"1px"}
+          onClick={handleViewProfile}
         >
-          {!loading ? "View" : "Wait..."}
+          View
         </button>
       </Box>
     </Box>

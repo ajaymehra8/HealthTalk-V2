@@ -1,6 +1,6 @@
 import { Box, Button, useToast } from "@chakra-ui/react";
 import React, { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { signup } from "../../Api/Auth";
 import axios from "axios";
 import { useAuthState } from "../../context/AuthProvider";
@@ -19,6 +19,7 @@ import {
 } from "react-icons/fi";
 import Typography from "../ui/Typography";
 import AuthField from "./AuthField";
+import BackButton from "../Common/BackButton";
 import "./Auth.css";
 
 const Signup = () => {
@@ -33,26 +34,14 @@ const Signup = () => {
   const emailRef = useRef(null);
   const toast = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from || "/";
 
   useEffect(() => {
     if (btnState === 1) {
       emailRef.current?.focus();
     }
   }, [btnState]);
-
-  useEffect(() => {
-    window.onpopstate = () => {
-      if (btnState > 1) {
-        setBtnState(btnState - 1);
-      } else {
-        navigate("/");
-      }
-    };
-
-    return () => {
-      window.onpopstate = null;
-    };
-  }, [btnState, navigate]);
 
   const responseGoogle = async (authResult) => {
     try {
@@ -72,7 +61,7 @@ const Signup = () => {
             duration: 5000,
             position: "top",
           });
-          navigate("/");
+          navigate(redirectTo, { replace: true });
         }
       }
     } catch (err) {
@@ -198,7 +187,7 @@ const Signup = () => {
             duration: 5000,
             position: "top",
           });
-          navigate("/");
+          navigate(redirectTo, { replace: true });
         }
       } catch (error) {
         toast({
@@ -230,6 +219,13 @@ const Signup = () => {
           transition={{ duration: 0.65, ease: "easeOut", delay: 0.05 }}
         >
           <Box className="auth-card__inner">
+            <BackButton
+              label="Back"
+              to={redirectTo}
+              fallbackTo="/"
+              mb={2}
+            />
+
             <Box className="auth-brand">
               <Logo
                 style={{
@@ -289,7 +285,11 @@ const Signup = () => {
 
             <Box className="auth-linkRow">
               <span>Already have an account?</span>
-              <NavLink to="/login" className="auth-link">
+              <NavLink
+                to="/login"
+                state={{ from: redirectTo }}
+                className="auth-link"
+              >
                 Log in
               </NavLink>
             </Box>

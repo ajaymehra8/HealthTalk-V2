@@ -11,11 +11,12 @@ import {
   Stack,
   Text,
   Textarea,
+  Spinner,
   useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaRegStar, FaStar } from "react-icons/fa";
 import {
   FiArrowLeft,
@@ -29,7 +30,7 @@ import {
 } from "react-icons/fi";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer";
-import { useAuthState } from "../../context/AuthProvider";
+import { useProtectedRoute } from "../../hooks/useProtectedRoute";
 
 const MotionBox = motion(Box);
 
@@ -103,22 +104,183 @@ const InfoTile = ({ icon, label, value }) => (
 );
 
 const Review = () => {
-  const { state } = useLocation();
+  const { doctorId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuthState();
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState("");
+  const [doctor, setDoctor] = useState(null);
   const toast = useToast();
-  const doctor = state?.user;
+  const { currentUser, requireAuth } = useProtectedRoute();
 
   useEffect(() => {
-    if (!doctor) {
-      navigate("/my-info", { replace: true });
-    }
-  }, [doctor, navigate]);
+    let isActive = true;
 
-  if (!doctor) return null;
+    const fetchDoctor = async () => {
+      if (!doctorId) {
+        if (isActive) {
+          setDoctor(null);
+          setProfileError("Open a doctor card to start a review.");
+          setProfileLoading(false);
+        }
+        return;
+      }
+
+      setProfileLoading(true);
+      setProfileError("");
+
+      try {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/v1/user/${doctorId}`
+        );
+
+        const fetchedDoctor = data?.doctor || data?.user || data?.data || null;
+
+        if (!isActive) return;
+
+        setDoctor(fetchedDoctor);
+        if (!fetchedDoctor) {
+          setProfileError("Doctor details are not available right now.");
+        }
+      } catch (error) {
+        if (!isActive) return;
+
+        setDoctor(null);
+        setProfileError(
+          error?.response?.data?.message ||
+            "Unable to load this doctor review page right now."
+        );
+      } finally {
+        if (isActive) {
+          setProfileLoading(false);
+        }
+      }
+    };
+
+    fetchDoctor();
+
+    return () => {
+      isActive = false;
+    };
+  }, [doctorId]);
+
+  if (profileLoading) {
+    return (
+      <>
+        <Navbar />
+        <Box
+          position="relative"
+          minH="100vh"
+          w="full"
+          overflow="hidden"
+          pt="66px"
+          bgGradient="linear(135deg, var(--profile-page-bg-start) 0%, var(--page-background-color) 50%, var(--profile-page-bg-end) 100%)"
+        >
+          <Container maxW="1320px" px={{ base: 4, md: 6, xl: 8 }} py={{ base: 5, md: 8 }}>
+            <MotionBox
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              p={{ base: 6, md: 8 }}
+              borderRadius="28px"
+              bg="linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,251,253,0.92))"
+              border="1px solid rgba(31, 58, 95, 0.08)"
+              boxShadow="0 24px 54px rgba(31, 58, 95, 0.08)"
+            >
+              <Stack spacing={4} align="center" textAlign="center">
+                <Spinner size="xl" color="var(--primary-green-color)" thickness="3px" />
+                <Text fontSize="xl" fontWeight="800" color="var(--heading-color)">
+                  Loading review form...
+                </Text>
+                <Text fontSize="sm" color="var(--regular-color)" lineHeight="1.7">
+                  We are fetching the doctor profile and review details.
+                </Text>
+              </Stack>
+            </MotionBox>
+          </Container>
+        </Box>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!doctor) {
+    return (
+      <>
+        <Navbar />
+        <Box
+          position="relative"
+          minH="100vh"
+          w="full"
+          overflow="hidden"
+          pt="66px"
+          bgGradient="linear(135deg, var(--profile-page-bg-start) 0%, var(--page-background-color) 50%, var(--profile-page-bg-end) 100%)"
+        >
+          <Container maxW="980px" px={{ base: 4, md: 6, xl: 8 }} py={8}>
+            <MotionBox
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              p={{ base: 5, md: 6 }}
+              borderRadius="28px"
+              bg="linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,251,253,0.92))"
+              border="1px solid rgba(31, 58, 95, 0.08)"
+              boxShadow="0 24px 54px rgba(31, 58, 95, 0.08)"
+            >
+              <Stack spacing={4}>
+                <Badge
+                  alignSelf="flex-start"
+                  px={3}
+                  py={1}
+                  borderRadius="full"
+                  bg="var(--auth-soft-accent-bg)"
+                  color="var(--primary-green-color)"
+                  border="1px solid var(--auth-soft-accent-border)"
+                  letterSpacing="0.18em"
+                  textTransform="uppercase"
+                  fontSize="10px"
+                  fontWeight="800"
+                >
+                  Review form
+                </Badge>
+                <Text
+                  fontSize={{ base: "2xl", md: "3xl" }}
+                  fontWeight="800"
+                  color="var(--heading-color)"
+                  letterSpacing="-0.03em"
+                >
+                  Review not available
+                </Text>
+                <Text fontSize="sm" color="var(--regular-color)" lineHeight="1.7">
+                  {profileError ||
+                    "Open a doctor profile first to submit a review for that doctor."}
+                </Text>
+                <Button
+                  onClick={() => navigate(-1)}
+                  leftIcon={<Box as={FiArrowLeft} />}
+                  h="46px"
+                  w="fit-content"
+                  borderRadius="16px"
+                  border="none"
+                  bg="linear-gradient(135deg, var(--primary-green-color), var(--auth-panel-end))"
+                  color="white"
+                  fontWeight="800"
+                  _hover={{
+                    bg: "linear-gradient(135deg, var(--secondary-green-color), var(--primary-green-color))",
+                  }}
+                >
+                  Go back
+                </Button>
+              </Stack>
+            </MotionBox>
+          </Container>
+        </Box>
+        <Footer />
+      </>
+    );
+  }
 
   const doctorName = doctor?.name || "Doctor";
   const doctorSpecialization = doctor?.specialization || "Specialist";
@@ -130,12 +292,29 @@ const Review = () => {
   const doctorFee = doctor?.clinicFee ? `$${doctor.clinicFee}` : "Fee not listed";
 
   const handleApplication = () => {
-    navigate("/doctor/form");
+    requireAuth(
+      () => navigate("/doctor/form"),
+      {
+        allowedRoles: ["user"],
+        unauthorizedMessage: "You are not allowed to do this action.",
+        unauthorizedRedirect: "/",
+      }
+    );
   };
 
   const handleFeedback = async () => {
-    const token = user?.jwt;
-    const url = `${process.env.REACT_APP_API_URL}/api/v1/review/${doctor?._id}`;
+    if (
+      !requireAuth(null, {
+        allowedRoles: ["user"],
+        unauthorizedMessage: "You are not allowed to do this action.",
+        unauthorizedRedirect: "/",
+      })
+    ) {
+      return;
+    }
+
+    const token = currentUser?.jwt;
+    const url = `${process.env.REACT_APP_API_URL}/api/v1/review/${doctorId}`;
     setLoading(true);
     const { data } = await axios.post(
       url,

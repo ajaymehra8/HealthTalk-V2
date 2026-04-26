@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Avatar,
   Box,
@@ -15,14 +14,14 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { FiSearch, FiUserPlus } from "react-icons/fi";
 import { RxCross2, RxHamburgerMenu } from "react-icons/rx";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthState } from "../../context/AuthProvider";
 import Logo from "../Logo/Logo";
 
 const MotionBox = motion(Box);
 
 const NAV_ITEMS = [
-  { label: "Find Doctors", action: "#doctors", icon: FiSearch },
+  { label: "Find Doctors", action: "/doctors", icon: FiSearch },
   { label: "Apply as Doctor", action: "/doctor/form", icon: FiUserPlus },
 ];
 
@@ -159,22 +158,23 @@ const ProfileButton = ({ user, onClick }) => (
 const Navbar = () => {
   const { user } = useAuthState();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isOpen, onToggle, onClose } = useDisclosure();
+  const authReturnTo = `${location.pathname}${location.search || ""}`;
 
   const goToLogin = () => {
     onClose();
-    navigate("/login");
+    navigate("/login", { state: { from: authReturnTo } });
   };
 
-  const scrollToDoctors = React.useCallback(() => {
-    const target = document.getElementById("doctors");
-    if (!target) return;
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
+  const goToDoctors = () => {
+    onClose();
+    navigate("/doctors");
+  };
 
   const goToSignup = () => {
     onClose();
-    navigate("/signup");
+    navigate("/signup", { state: { from: authReturnTo } });
   };
 
   const goToDoctorForm = () => {
@@ -211,7 +211,7 @@ const Navbar = () => {
             <Logo />
 
             <HStack display={{ base: "none", lg: "flex" }} spacing={2}>
-              <DesktopNavButton icon={FiSearch} onClick={scrollToDoctors}>
+              <DesktopNavButton icon={FiSearch} onClick={goToDoctors}>
                 Find Doctors
               </DesktopNavButton>
               <DesktopNavButton icon={FiUserPlus} onClick={goToDoctorForm}>
@@ -300,22 +300,26 @@ const Navbar = () => {
                   backdropFilter="blur(20px)"
                 >
                   <Stack spacing={4}>
-                    <Stack spacing={3} alignItems={"center"}>
-                      {NAV_ITEMS.map((item) => (
-                        <MobileNavButton
-                          key={item.label}
-                          icon={item.icon}
-                          onClick={
-                            item.action === "login"
-                              ? goToLogin
-                              : item.action === "/doctor/form"
-                                ? goToDoctorForm
-                                : onClose
+                  <Stack spacing={3} alignItems={"center"}>
+                    {NAV_ITEMS.map((item) => (
+                      <MobileNavButton
+                        key={item.label}
+                        icon={item.icon}
+                        onClick={() => {
+                          if (item.action === "/doctors") {
+                            goToDoctors();
+                            return;
                           }
-                        >
-                          {item.label}
-                        </MobileNavButton>
-                      ))}
+                          if (item.action === "/doctor/form") {
+                            goToDoctorForm();
+                            return;
+                          }
+                          onClose();
+                        }}
+                      >
+                        {item.label}
+                      </MobileNavButton>
+                    ))}
                     </Stack>
 
                     <Divider borderColor="rgba(31,58,95,0.10)" />
