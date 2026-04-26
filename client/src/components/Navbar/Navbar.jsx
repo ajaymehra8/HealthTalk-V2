@@ -69,8 +69,8 @@ const MobileNavButton = ({ icon: Icon, onClick, children, ...buttonProps }) => (
   <Button
     onClick={onClick}
     leftIcon={Icon ? <Box as={Icon} /> : undefined}
-    justifyContent="space-between"
-    w="full"
+    justifyContent="center"
+    width={"full"}
     bg="rgba(31, 58, 95, 0.04)"
     color="var(--heading-color)"
     border="1px solid rgba(31,58,95,0.08)"
@@ -163,7 +163,7 @@ const Navbar = () => {
 
   const goToLogin = () => {
     onClose();
-    navigate("#doctors");
+    navigate("/login");
   };
 
   const scrollToDoctors = React.useCallback(() => {
@@ -262,6 +262,7 @@ const Navbar = () => {
             <MotionBox
               display={{ base: "block", lg: "none" }}
               position="fixed"
+              maxWidth={"7xl"}
               top={{ base: "64px", md: "72px" }}
               left={0}
               right={0}
@@ -280,7 +281,7 @@ const Navbar = () => {
               display={{ base: "block", lg: "none" }}
               position="fixed"
               top={{ base: "64px", md: "72px" }}
-              left={0}
+              left={{ base: 0, sm: "auto" }}
               right={0}
               zIndex={1110}
               initial={{ opacity: 0, y: -14, scale: 0.98 }}
@@ -288,7 +289,7 @@ const Navbar = () => {
               exit={{ opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
             >
-              <Container maxW="7xl" px={{ base: 4, md: 6, xl: 8 }}>
+              <Container minW="350px" maxW="500px" px={{ base: 4, md: 6, xl: 8 }}>
                 <Box
                   mt={3}
                   p={4}
@@ -299,7 +300,7 @@ const Navbar = () => {
                   backdropFilter="blur(20px)"
                 >
                   <Stack spacing={4}>
-                    <Stack spacing={3}>
+                    <Stack spacing={3} alignItems={"center"}>
                       {NAV_ITEMS.map((item) => (
                         <MobileNavButton
                           key={item.label}
