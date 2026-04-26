@@ -80,12 +80,12 @@ const ReviewCard = ({ review, setReviews, index = 0 }) => {
       bg="linear-gradient(180deg, rgba(255,255,255,0.98), rgba(247,251,253,0.94))"
       boxShadow="0 22px 48px rgba(31, 58, 95, 0.08)"
     >
-      <Flex direction={{ base: "column", md: "row" }} align="stretch">
+      <Flex direction={{ base: "column", lg: "row" }} align="stretch">
         <MotionBox
           as="button"
           type="button"
           flexShrink={0}
-          w={{ base: "full", md: "280px" }}
+          w={{ base: "full", lg: "280px" }}
           p={5}
           bg="linear-gradient(180deg, rgba(41, 128, 78, 0.05), rgba(255,255,255,0.22))"
           boxShadow="inset 0 1px 0 rgba(255,255,255,0.65)"
@@ -135,7 +135,7 @@ const ReviewCard = ({ review, setReviews, index = 0 }) => {
           </Stack>
         </MotionBox>
 
-        <Box flex="1" p={{ base: 5, md: 6 }}>
+        <Box flex="1" minW={0} p={{ base: 5, md: 6 }}>
           <Flex
             direction={{ base: "column", md: "row" }}
             align={{ md: "flex-start" }}

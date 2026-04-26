@@ -31,13 +31,13 @@ const ReviewCard = ({ review }) => {
       bg="linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,251,253,0.92))"
       boxShadow="0 14px 30px rgba(31, 58, 95, 0.06)"
     >
-      <Flex direction={{ base: "column", sm: "row" }} align="stretch">
+      <Flex direction={{ base: "column", lg: "row" }} align="stretch">
         <Box
-          w={{ base: "full", sm: "190px" }}
+          w={{ base: "full", lg: "190px" }}
           p={4}
           bg="rgba(31, 58, 95, 0.03)"
-          borderRight={{ base: "none", sm: "1px solid rgba(31, 58, 95, 0.08)" }}
-          borderBottom={{ base: "1px solid rgba(31, 58, 95, 0.08)", sm: "none" }}
+          borderRight={{ base: "none", lg: "1px solid rgba(31, 58, 95, 0.08)" }}
+          borderBottom={{ base: "1px solid rgba(31, 58, 95, 0.08)", lg: "none" }}
         >
           <Stack spacing={3} align="center" textAlign="center">
             <Avatar
@@ -75,7 +75,7 @@ const ReviewCard = ({ review }) => {
           </Stack>
         </Box>
 
-        <Box flex="1" p={4}>
+        <Box flex="1" minW={0} p={4}>
           <Stack spacing={3}>
             <Box
               p={4}

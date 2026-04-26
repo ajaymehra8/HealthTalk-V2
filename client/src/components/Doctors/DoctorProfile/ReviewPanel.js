@@ -71,12 +71,12 @@ const ReviewPanel = ({ doctor }) => {
         width="100%"
         minW="280px"
         mb={4}
-        pr={2}
+        pr={{ base: 0, lg: 2 }}
         display="flex"
         flexDir="column"
         gap={3}
-        overflowY="auto"
-        maxH={{ base: "280px", lg: "320px" }}
+        overflowY={{ base: "visible", lg: "auto" }}
+        maxH={{ base: "none", lg: "320px" }}
       >
         {doctor?.reviews?.length > 0 ? (
           doctor?.reviews?.map((review) => (
