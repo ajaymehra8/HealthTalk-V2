@@ -226,9 +226,9 @@ const Login = () => {
               loadingText="Wait..."
               isDisabled={loading}
               width="100%"
-              height="54px"
-              minHeight="54px"
-              borderRadius="16px"
+              height="44px"
+              minHeight="44px"
+              borderRadius="12px"
               border="none"
               bg="linear-gradient(135deg, var(--primary-green-color), var(--auth-panel-end))"
               color="var(--surface-color)"
