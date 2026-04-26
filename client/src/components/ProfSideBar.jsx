@@ -3,13 +3,16 @@ import {
   Avatar,
   Box,
   Button,
+  Divider,
   Stack,
   Text,
   useBreakpointValue,
+  useToast,
 } from "@chakra-ui/react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthState } from "../context/AuthProvider";
 import { motion } from "framer-motion";
+import { FiLogOut } from "react-icons/fi";
 import { RxCross2, RxHamburgerMenu } from "react-icons/rx";
 
 const roleNavItems = {
@@ -51,7 +54,9 @@ const roleNavItems = {
 const MotionBox = motion(Box);
 
 const ProfSideBar = ({ topOffset = 66 }) => {
-  const { user, show, setShow } = useAuthState();
+  const { user, show, setShow, setUser } = useAuthState();
+  const navigate = useNavigate();
+  const toast = useToast();
   const handleButtonLeft = useBreakpointValue({
     base: show ? "calc(clamp(250px, 78vw, 320px) - 108px)" : "12px",
     lg: "calc(22% - 108px)",
@@ -59,6 +64,20 @@ const ProfSideBar = ({ topOffset = 66 }) => {
 
   const changeShow = () => {
     setShow(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("userInfo");
+    setUser(null);
+    setShow(false);
+    navigate("/");
+    toast({
+      title: "Log out successfully",
+      position: "top",
+      status: "success",
+      isClosable: true,
+      duration: 10000,
+    });
   };
 
   const displayName = user?.name
@@ -250,6 +269,30 @@ const ProfSideBar = ({ topOffset = 66 }) => {
               </Box>
             ))}
           </Stack>
+
+          <Box pt={2}>
+            <Divider borderColor="var(--profile-sidebar-card-border)" mb={4} />
+            <Button
+              onClick={handleLogout}
+              w="full"
+              h="46px"
+              borderRadius="16px"
+              bg="linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)"
+              color="white"
+              border="1px solid rgba(248, 113, 113, 0.28)"
+              boxShadow="0 18px 30px rgba(239, 68, 68, 0.24)"
+              fontWeight="800"
+              _hover={{
+                bg: "linear-gradient(135deg, #f87171 0%, #dc2626 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 22px 34px rgba(239, 68, 68, 0.28)",
+              }}
+              transition="all 0.2s ease"
+              leftIcon={<FiLogOut />}
+            >
+              Logout
+            </Button>
+          </Box>
         </Stack>
       </MotionBox>
     </>
