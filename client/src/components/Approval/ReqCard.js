@@ -144,7 +144,6 @@ const ReqCard = ({ req, setReqs }) => {
     }
   };
 
-  const doctorId = req.user?._id || req._id;
   return (
     <MotionBox
       layout
@@ -207,7 +206,7 @@ const ReqCard = ({ req, setReqs }) => {
               </Text>
             </Stack>
 
-            <HStack
+              <HStack
               spacing={2}
               px={3}
               py={2}
@@ -217,7 +216,7 @@ const ReqCard = ({ req, setReqs }) => {
             >
               <Box as={FiEye} fontSize="14px" />
               <Text fontSize="sm" fontWeight="700">
-                Review profile
+                Review request
               </Text>
             </HStack>
           </Stack>
@@ -258,7 +257,7 @@ const ReqCard = ({ req, setReqs }) => {
                     color="var(--heading-color)"
                     letterSpacing="-0.03em"
                   >
-                    {req?.specialization?.[0] || "Doctor profile"}
+                    {req?.specialization || "Doctor profile"}
                   </Text>
                   <Text fontSize="sm" color="var(--regular-color)">
                     This request includes the doctor&apos;s profile, education, fee, and location details.
@@ -295,7 +294,7 @@ const ReqCard = ({ req, setReqs }) => {
                 />
                 <MetaPill
                   label="Clinic fee"
-                  value={req?.clinicFee ? `Rs. ${req.clinicFee}` : "Not set"}
+                  value={req?.clinicFee ? `$ ${req.clinicFee}` : "Not set"}
                   icon={FiDollarSign}
                 />
               </Flex>
@@ -347,8 +346,8 @@ const ReqCard = ({ req, setReqs }) => {
             >
               <Button
                 onClick={() => {
-                  if (doctorId) {
-                    navigate(`/doctor-profile/${doctorId}`);
+                  if (req?._id) {
+                    navigate(`/my-profile/approvals/${req._id}`);
                   }
                 }}
                 h="48px"
@@ -364,7 +363,7 @@ const ReqCard = ({ req, setReqs }) => {
                   transform: "translateY(-1px)",
                 }}
               >
-                View profile
+                View request
               </Button>
 
               <Button

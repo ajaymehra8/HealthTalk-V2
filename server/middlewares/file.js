@@ -75,7 +75,7 @@ const uploadPdfToCloudinary = async (req, res, next) => {
       buffer: req.file.buffer,
       mimetype: req.file.mimetype || "application/pdf",
       folder: "healthtalk/doctors/degrees",
-      resourceType: "raw",
+      resourceType: "auto",
     });
 
     req.file.fileName = uploadResult.secure_url;

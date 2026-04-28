@@ -203,6 +203,36 @@ exports.getReqs = async (req, res) => {
   }
 };
 
+exports.getSingleReq = async (req, res) => {
+  try {
+    const { reqId } = req.params;
+
+    const request = await Reqs.findById(reqId).populate({
+      path: "user",
+      select: "-password -__v",
+    });
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Request not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Request fetched successfully",
+      req: request,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      success: false,
+      message: "Unknown problem occurs",
+    });
+  }
+};
+
 exports.getWebsiteDetails = async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();

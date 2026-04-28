@@ -290,7 +290,7 @@ exports.isAdmin = async (req, res, next) => {
     });
   }
   // 4) Check user is admin or not
-  if (!user.role === "admin") {
+  if (user.role !== "admin") {
     return res.status(401).json({
       success:false,
       message:"The user is not admin"

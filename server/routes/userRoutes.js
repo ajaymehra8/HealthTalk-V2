@@ -74,12 +74,17 @@ router.get(
   authController.isAdmin,
   userController.getWebsiteDetails
 );
+router.get(
+  "/request/:reqId",
+  authController.isAdmin,
+  userController.getSingleReq
+);
 router.get("/request", authController.isAdmin, userController.getReqs);
 
 router.route("/:userId").get(userController.getSingleDoctor);
 router.delete("/doctor/:doctor",authController.isAdmin,   userController.deleteDoctor);
-router.delete("/delete-all", async (req, res) => {
-  await User.deleteMany({});
-  res.send("deleted");
-});
+// router.delete("/delete-all", async (req, res) => {
+//   await User.deleteMany({});
+//   res.send("deleted");
+// });
 module.exports = router;
