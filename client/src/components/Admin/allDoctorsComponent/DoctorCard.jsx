@@ -212,7 +212,7 @@ const DoctorCard = ({ doctor }) => {
                   letterSpacing="0.18em"
                   fontWeight="800"
                 >
-                  Clinic fee {doctor?.clinicFee ? `Rs. ${doctor.clinicFee}` : "n/a"}
+                  Clinic fee {doctor?.clinicFee ? `$${doctor.clinicFee}` : "n/a"}
                 </Badge>
               </Flex>
 
