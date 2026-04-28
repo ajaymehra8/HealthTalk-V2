@@ -18,8 +18,8 @@ router.get("/google-auth", authController.googleLogin);
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:3000/login",
-    successRedirect: "http://localhost:3000",
+    failureRedirect: `${process.env.BASE_URL}/login`,
+    successRedirect: process.env.BASE_URL,
   }),
  
 );
