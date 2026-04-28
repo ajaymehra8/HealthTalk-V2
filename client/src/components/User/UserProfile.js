@@ -15,6 +15,7 @@ import Earning from "../Doctors/Earning/Earning";
 import WebInfo from "../Admin/adminPageComponent/WebInfo";
 import AdminReports from "../Admin/AdminReports";
 import AllDoctors from "../Admin/AllDoctors";
+import ReqProfCard from "../Admin/ReqProfCard";
 
 const PROFILE_NAV_OFFSET = 66;
 
@@ -97,6 +98,7 @@ const UserInfo = () => {
                     )
                   }
                 />
+                <Route path="approvals/:reqId" element={<ReqProfCard />} />
                 <Route path="approvals" element={<Approvals />} />
                 <Route path="reports" element={<AdminReports />} />
                 <Route path="all-doctors" element={<AllDoctors />} />

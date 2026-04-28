@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Container,
-  Divider,
   Flex,
   HStack,
   IconButton,
@@ -12,7 +11,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { FiSearch, FiUserPlus } from "react-icons/fi";
 import { RxCross2, RxHamburgerMenu } from "react-icons/rx";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthState } from "../../context/AuthProvider";
@@ -20,14 +18,9 @@ import Logo from "../Logo/Logo";
 
 const MotionBox = motion(Box);
 
-const NAV_ITEMS = [
-  { label: "Find Doctors", action: "/doctors", icon: FiSearch },
-  { label: "Apply as Doctor", action: "/doctor/form", icon: FiUserPlus },
-];
-
-const navButtonStyles = {
+const actionButtonStyles = {
   h: "42px",
-  px: 4,
+  px: 5,
   borderRadius: "full",
   fontSize: "sm",
   fontWeight: "800",
@@ -35,9 +28,9 @@ const navButtonStyles = {
   transition: "all 0.2s ease",
 };
 
-const actionButtonStyles = {
+const navButtonStyles = {
   h: "42px",
-  px: 5,
+  px: 4,
   borderRadius: "full",
   fontSize: "sm",
   fontWeight: "800",
@@ -69,7 +62,7 @@ const MobileNavButton = ({ icon: Icon, onClick, children, ...buttonProps }) => (
     onClick={onClick}
     leftIcon={Icon ? <Box as={Icon} /> : undefined}
     justifyContent="center"
-    width={"full"}
+    width="full"
     bg="rgba(31, 58, 95, 0.04)"
     color="var(--heading-color)"
     border="1px solid rgba(31,58,95,0.08)"
@@ -80,6 +73,11 @@ const MobileNavButton = ({ icon: Icon, onClick, children, ...buttonProps }) => (
     {children}
   </Button>
 );
+
+const NAV_ITEMS = [
+  { label: "Find Doctors", action: "/doctors" },
+  { label: "Apply as Doctor", action: "/doctor/form" },
+];
 
 const PrimaryActionButton = ({ onClick, children, ...buttonProps }) => (
   <Button
@@ -111,7 +109,7 @@ const SecondaryActionButton = ({ onClick, children, ...buttonProps }) => (
   </Button>
 );
 
-const ProfileButton = ({ user, onClick }) => (
+const ProfileButton = ({ user, onClick, ...buttonProps }) => (
   <Button
     as={NavLink}
     to="/my-profile"
@@ -128,6 +126,7 @@ const ProfileButton = ({ user, onClick }) => (
       bg: "rgba(255,255,255,0.96)",
       transform: "translateY(-1px)",
     }}
+    {...buttonProps}
   >
     <HStack spacing={2}>
       <Avatar
@@ -161,15 +160,11 @@ const Navbar = () => {
   const location = useLocation();
   const { isOpen, onToggle, onClose } = useDisclosure();
   const authReturnTo = `${location.pathname}${location.search || ""}`;
+  const isUser = user?.role === "user";
 
   const goToLogin = () => {
     onClose();
     navigate("/login", { state: { from: authReturnTo } });
-  };
-
-  const goToDoctors = () => {
-    onClose();
-    navigate("/doctors");
   };
 
   const goToSignup = () => {
@@ -177,14 +172,19 @@ const Navbar = () => {
     navigate("/signup", { state: { from: authReturnTo } });
   };
 
-  const goToDoctorForm = () => {
-    onClose();
-    navigate("/doctor/form");
-  };
-
   const goToProfile = () => {
     onClose();
     navigate("/my-profile");
+  };
+
+  const goToDoctors = () => {
+    onClose();
+    navigate("/doctors");
+  };
+
+  const goToDoctorForm = () => {
+    onClose();
+    navigate("/doctor/form");
   };
 
   return (
@@ -209,15 +209,14 @@ const Navbar = () => {
         >
           <HStack spacing={{ base: 3, lg: 8 }} minW={0} flex="1">
             <Logo />
-
-            <HStack display={{ base: "none", lg: "flex" }} spacing={2}>
-              <DesktopNavButton icon={FiSearch} onClick={goToDoctors}>
-                Find Doctors
-              </DesktopNavButton>
-              <DesktopNavButton icon={FiUserPlus} onClick={goToDoctorForm}>
-                Apply as Doctor
-              </DesktopNavButton>
-            </HStack>
+            {isUser ? (
+              <HStack display={{ base: "none", lg: "flex" }} spacing={2}>
+                <DesktopNavButton onClick={goToDoctors}>Find Doctors</DesktopNavButton>
+                <DesktopNavButton onClick={goToDoctorForm}>
+                  Apply as Doctor
+                </DesktopNavButton>
+              </HStack>
+            ) : null}
           </HStack>
 
           <HStack spacing={2.5} flexShrink={0}>
@@ -289,7 +288,7 @@ const Navbar = () => {
               exit={{ opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
             >
-              <Container minW="350px" maxW="500px" px={{ base: 4, md: 6, xl: 8 }}>
+              <Container maxW="500px" px={{ base: 4, md: 6, xl: 8 }}>
                 <Box
                   mt={3}
                   p={4}
@@ -300,29 +299,28 @@ const Navbar = () => {
                   backdropFilter="blur(20px)"
                 >
                   <Stack spacing={4}>
-                  <Stack spacing={3} alignItems={"center"}>
-                    {NAV_ITEMS.map((item) => (
-                      <MobileNavButton
-                        key={item.label}
-                        icon={item.icon}
-                        onClick={() => {
-                          if (item.action === "/doctors") {
-                            goToDoctors();
-                            return;
-                          }
-                          if (item.action === "/doctor/form") {
-                            goToDoctorForm();
-                            return;
-                          }
-                          onClose();
-                        }}
-                      >
-                        {item.label}
-                      </MobileNavButton>
-                    ))}
-                    </Stack>
-
-                    <Divider borderColor="rgba(31,58,95,0.10)" />
+                    {isUser ? (
+                      <Stack spacing={3} alignItems="center">
+                        {NAV_ITEMS.map((item) => (
+                          <MobileNavButton
+                            key={item.label}
+                            onClick={() => {
+                              if (item.action === "/doctors") {
+                                goToDoctors();
+                                return;
+                              }
+                              if (item.action === "/doctor/form") {
+                                goToDoctorForm();
+                                return;
+                              }
+                              onClose();
+                            }}
+                          >
+                            {item.label}
+                          </MobileNavButton>
+                        ))}
+                      </Stack>
+                    ) : null}
 
                     {user ? (
                       <Button
@@ -362,6 +360,15 @@ const Navbar = () => {
                       </Button>
                     ) : (
                       <Stack spacing={3}>
+                        <Text
+                          fontSize="xs"
+                          textTransform="uppercase"
+                          letterSpacing="0.18em"
+                          fontWeight="800"
+                          color="var(--secondary-gray-color)"
+                        >
+                          Account center
+                        </Text>
                         <SecondaryActionButton onClick={goToLogin} w="full">
                           Login
                         </SecondaryActionButton>

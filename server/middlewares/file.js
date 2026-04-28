@@ -1,8 +1,6 @@
 const multer = require("multer");
 const sharp = require("sharp");
-const { storage } = require("../config/firebase");
-const { ref, uploadBytes, getDownloadURL } = require("firebase/storage");
-const { v4: uuidv4 } = require("uuid");
+const { uploadToCloudinary } = require("../config/firebase");
 
 const multerStorage = multer.memoryStorage();
 
@@ -13,11 +11,12 @@ const multerFilter = (req, file, cb) => {
     cb(new Error("Not an image! Please upload only images."), false);
   }
 };
+
 const multerFilter2 = (req, file, cb) => {
   if (file.mimetype === "application/pdf") {
     cb(null, true);
   } else {
-    cb(new Error("Not an file! Please upload only images."), false);
+    cb(new Error("Not a file! Please upload only PDFs."), false);
   }
 };
 
@@ -25,10 +24,11 @@ const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
 });
+
 const upload2 = multer({
   storage: multerStorage,
   fileFilter: multerFilter2,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file size limit
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
 const uploadUserPhoto = upload.single("image");
@@ -36,36 +36,30 @@ const uploadDoctorPdf = upload2.single("degree");
 
 const resizeUserPhoto = async (req, res, next) => {
   if (!req.file) return next();
+
   req.file.buffer = await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat("jpeg")
     .jpeg({ quality: 90 })
     .toBuffer();
 
+  req.file.mimetype = "image/jpeg";
   next();
 };
-const uploadPdfToFirebase = async (req, res, next) => {
+
+const uploadPhotoToCloudinary = async (req, res, next) => {
   if (!req.file) return next();
 
-  const fileBuffer = req.file.buffer;
-  const fileExtension =
-    req.file.mimetype === "application/pdf"
-      ? "pdf"
-      : req.file.mimetype.split("/")[1];
-  const uniqueId = uuidv4();
-  const timestamp = Date.now();
-  const fileName = `${uniqueId}-${timestamp}.${fileExtension}`;
-
   try {
-    const metadata = {
-      contentType: "application/pdf", // Ensure correct Content-Type
-    };
+    const uploadResult = await uploadToCloudinary({
+      buffer: req.file.buffer,
+      mimetype: req.file.mimetype,
+      folder: "healthtalk/users",
+      resourceType: "image",
+    });
 
-    const storageRef = ref(storage, `doctors/degrees/${fileName}`);
-    const uploadResult = await uploadBytes(storageRef, fileBuffer, metadata);
-    const downloadUrl = await getDownloadURL(uploadResult.ref);
-
-    req.file.fileName = downloadUrl; // Add file URL to request object
+    req.file.fileName = uploadResult.secure_url;
+    req.file.cloudinaryId = uploadResult.public_id;
     next();
   } catch (err) {
     console.error(err);
@@ -73,26 +67,19 @@ const uploadPdfToFirebase = async (req, res, next) => {
   }
 };
 
-const uploadPhotoToFirebase = async (req, res, next) => {
+const uploadPdfToCloudinary = async (req, res, next) => {
   if (!req.file) return next();
 
-  const fileBuffer = req.file.buffer;
-  const fileExtension = req.file.mimetype.split("/")[1]; // Extract file extension from mimetype
-  const uniqueId = uuidv4();
-  const timestamp = Date.now();
-  const fileName = `${uniqueId}-${timestamp}.${fileExtension}`;
-
   try {
-    const metadata = {
-      contentType: req.file.mimetype, // Use the file's mimetype for correct Content-Type
-    };
+    const uploadResult = await uploadToCloudinary({
+      buffer: req.file.buffer,
+      mimetype: req.file.mimetype || "application/pdf",
+      folder: "healthtalk/doctors/degrees",
+      resourceType: "auto",
+    });
 
-    const storageRef = ref(storage, `users/${fileName}`);
-    const uploadResult = await uploadBytes(storageRef, fileBuffer, metadata);
-    const downloadUrl = await getDownloadURL(uploadResult.ref);
-
-    req.file.fileName = downloadUrl;
-
+    req.file.fileName = uploadResult.secure_url;
+    req.file.cloudinaryId = uploadResult.public_id;
     next();
   } catch (err) {
     console.error(err);
@@ -104,6 +91,9 @@ module.exports = {
   uploadUserPhoto,
   uploadDoctorPdf,
   resizeUserPhoto,
-  uploadPhotoToFirebase,
-  uploadPdfToFirebase,
+  uploadPhotoToCloudinary,
+  uploadPdfToCloudinary,
+  // Backward-compatible aliases for any remaining imports.
+  uploadPhotoToFirebase: uploadPhotoToCloudinary,
+  uploadPdfToFirebase: uploadPdfToCloudinary,
 };

@@ -6,9 +6,9 @@ const express = require("express");
 const {
   uploadUserPhoto,
   resizeUserPhoto,
-  uploadPhotoToFirebase,
+  uploadPhotoToCloudinary,
   uploadDoctorPdf,
-  uploadPdfToFirebase,
+  uploadPdfToCloudinary,
 } = require("../middlewares/file");
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router
     authController.isProtect,
     uploadUserPhoto,
     resizeUserPhoto,
-    uploadPhotoToFirebase,
+    uploadPhotoToCloudinary,
     userController.updateUser
   );
 
@@ -48,7 +48,7 @@ router
     authController.isProtect,
     uploadUserPhoto,
     resizeUserPhoto,
-    uploadPhotoToFirebase,
+    uploadPhotoToCloudinary,
     userController.updateDoctor
   );
 router
@@ -56,7 +56,7 @@ router
   .post(
     authController.isProtect,
     uploadDoctorPdf,
-    uploadPdfToFirebase,
+    uploadPdfToCloudinary,
     authController.sendReqToBecomeDoctor
   );
 router.post(
@@ -69,12 +69,22 @@ router.get(
   authController.isAdmin,
   userController.getWebsiteDetails
 );
+router.get(
+  "/get-website-detaisl",
+  authController.isAdmin,
+  userController.getWebsiteDetails
+);
+router.get(
+  "/request/:reqId",
+  authController.isAdmin,
+  userController.getSingleReq
+);
 router.get("/request", authController.isAdmin, userController.getReqs);
 
 router.route("/:userId").get(userController.getSingleDoctor);
 router.delete("/doctor/:doctor",authController.isAdmin,   userController.deleteDoctor);
-router.delete("/delete-all", async (req, res) => {
-  await User.deleteMany({});
-  res.send("deleted");
-});
+// router.delete("/delete-all", async (req, res) => {
+//   await User.deleteMany({});
+//   res.send("deleted");
+// });
 module.exports = router;

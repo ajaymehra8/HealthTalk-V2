@@ -61,6 +61,7 @@ exports.getAppoinmentsForDoctor = async (req, res, next) => {
       path: "user",
       select: "-password",
     }).sort({createdAt:-1});
+    console.log(bookings)
     res.status(200).json({
       success: true,
       bookings,
@@ -78,12 +79,16 @@ exports.getDoneAppoinmentForDoctor = async (req, res, next) => {
         path: "user",
         select: "email name image  -_id",
       })
-      .sort({ updatedAt: 1 });
-     
+      .sort({ createdAt: -1 });
+
     const doctor = await User.findById(id);
-    const totalIncome = appoinments * doctor?.clinicFee;
+    const clinicFee = Number(doctor?.clinicFee || 0);
+    const appointmentCount = appoinments.length;
+    const totalIncome = appointmentCount * clinicFee;
     res.status(200).json({
       totalIncome,
+      clinicFee,
+      appointmentCount,
       appoinments,
     });
   } catch (err) {
