@@ -6,9 +6,9 @@ const express = require("express");
 const {
   uploadUserPhoto,
   resizeUserPhoto,
-  uploadPhotoToFirebase,
+  uploadPhotoToCloudinary,
   uploadDoctorPdf,
-  uploadPdfToFirebase,
+  uploadPdfToCloudinary,
 } = require("../middlewares/file");
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router
     authController.isProtect,
     uploadUserPhoto,
     resizeUserPhoto,
-    uploadPhotoToFirebase,
+    uploadPhotoToCloudinary,
     userController.updateUser
   );
 
@@ -48,7 +48,7 @@ router
     authController.isProtect,
     uploadUserPhoto,
     resizeUserPhoto,
-    uploadPhotoToFirebase,
+    uploadPhotoToCloudinary,
     userController.updateDoctor
   );
 router
@@ -56,7 +56,7 @@ router
   .post(
     authController.isProtect,
     uploadDoctorPdf,
-    uploadPdfToFirebase,
+    uploadPdfToCloudinary,
     authController.sendReqToBecomeDoctor
   );
 router.post(

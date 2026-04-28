@@ -145,7 +145,6 @@ const ReqCard = ({ req, setReqs }) => {
   };
 
   const doctorId = req.user?._id || req._id;
-
   return (
     <MotionBox
       layout
@@ -286,7 +285,7 @@ const ReqCard = ({ req, setReqs }) => {
               <Flex wrap="wrap" gap={3}>
                 <MetaPill
                   label="Specialization"
-                  value={req?.specialization?.join(", ") || "Not added"}
+                  value={req?.specialization || "Not added"}
                   icon={FiTag}
                 />
                 <MetaPill
