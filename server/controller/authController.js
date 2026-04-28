@@ -93,7 +93,7 @@ exports.sendOtp = async (req, res, next) => {
     await validateEmailDomain(req, res, email);
     const otp = createOTP(email);
     const emailP = new Email({ email });
-    emailP.sendOtp(otp);
+    void emailP.sendOtp(otp).catch(console.error);
     res.status(200).json({
       success: true,
       message: "OTP send successfully",
@@ -156,7 +156,7 @@ exports.signup = async (req, res, next) => {
     await validateEmailDomain(req, res, email);
     const user = await User.create(req.body);
     const emailP = new Email(user);
-    emailP.sendWelcome().then(() => console.log("Welcome email sent!"));
+    void emailP.sendWelcome().catch(console.error);
 
     res.status(201).json({
       success: true,

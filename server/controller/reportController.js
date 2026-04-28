@@ -11,19 +11,19 @@ exports.createReport = async (req, res, next) => {
       doctor: doctorId,
     });
     if (checkReport) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "One user can report only once",
       });
     }
-    const newReport = await Report.create({
+    await Report.create({
       report,
       user: userId,
       doctor: doctorId,
     });
     const doctor = await User.findById(doctorId);
     const email = new Email(req.user);
-    email.report(doctor, req.user);
+    void email.report(doctor, req.user, report).catch(console.error);
     res.status(200).json({
       success: true,
       message: "Reported doctor successfully.",
