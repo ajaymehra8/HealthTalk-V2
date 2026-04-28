@@ -1,12 +1,14 @@
-import React, { useState,useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuthState } from "../../context/AuthProvider";
-import { Box } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import ReqCard from "../Approval/ReqCard";
 import axios from 'axios';
+import { FiUserCheck } from "react-icons/fi";
+import { AdminEmptyState, AdminPageHero, AdminPanel } from "./adminPageComponent/AdminLayout";
 const Approvals = () => {
   const { user } = useAuthState();
   const [reqs,setReqs]=useState([]);
-  const fetchReqs = async () => {
+  const fetchReqs = useCallback(async () => {
     const token = user?.jwt;
   
     try {
@@ -25,42 +27,59 @@ const Approvals = () => {
     } catch (error) {
       console.error("Error fetching requests:", error.response?.data || error.message);
     }
-  };
+  }, [user?.jwt]);
   
   useEffect(()=>{
-fetchReqs();
-  },[user])
+    fetchReqs();
+  },[fetchReqs])
   return (
-    <Box
-    display={"flex"}
-    flexDir={"column"}
-    alignItems={"start"}
-    justifyContent={"start"}
-    w={"clamp(320px,90%,1000px)"}
-    minH={"85vh"}
-    height={'auto'}
-          p={"2px 20px"}
-          pt={'10px'}
-          pb={'1vh'}
-    bg={"white"}
-    borderRadius={"10px"}
-    boxShadow={"1px 1px 10px 4px #686d77"}
-    sx={{
-      "@media(max-width:500px)":{
-        minHeight:"63vh",
-      },
-    }}
-    >
-      {reqs?.length > 0 && (
-        <h1 className="page-head" style={{ marginBottom: "5px" }}>
-          All Requests
-        </h1>
-      )}
-      {reqs?.length > 0 ? (
-        reqs?.map((req) => <ReqCard req={req} setReqs={setReqs}/>)
-      ) : (
-        <h1 className="no-item-text">No Requests Yet.</h1>
-      )}
+    <Box w="full" maxW="1180px" mx="auto">
+      <AdminPageHero
+        badge="Approvals"
+        title="Pending doctor approvals"
+        description="Review new doctor applications in the same calm, glassy layout used across the rest of the profile area."
+        stats={[
+          {
+            label: "Pending requests",
+            value: reqs.length,
+            detail: "Applications waiting for admin review.",
+            icon: FiUserCheck,
+          },
+        ]}
+      >
+        <Box
+          w={{ base: "full", xl: "290px" }}
+          p={4}
+          borderRadius="22px"
+          bg="rgba(31, 58, 95, 0.04)"
+          border="1px solid rgba(31, 58, 95, 0.08)"
+        >
+          <Text fontSize="sm" color="var(--regular-color)">
+            Queue status
+          </Text>
+          <Text mt={1} fontSize="2xl" fontWeight="800" color="var(--heading-color)">
+            {reqs.length}
+          </Text>
+          <Text fontSize="sm" color="var(--regular-color)" mt={2} lineHeight="1.6">
+            Every item here comes from the live DoctorInfo request collection.
+          </Text>
+        </Box>
+      </AdminPageHero>
+
+      <AdminPanel minH={{ base: "52vh", md: "60vh" }}>
+        {reqs?.length > 0 ? (
+          <Box display="flex" flexDir="column" gap={4}>
+            {reqs?.map((req) => (
+              <ReqCard key={req?._id} req={req} setReqs={setReqs} />
+            ))}
+          </Box>
+        ) : (
+          <AdminEmptyState
+            title="No requests waiting right now"
+            description="When a doctor applies, their request will appear here automatically."
+          />
+        )}
+      </AdminPanel>
     </Box>
   );
 };

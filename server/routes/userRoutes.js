@@ -69,6 +69,11 @@ router.get(
   authController.isAdmin,
   userController.getWebsiteDetails
 );
+router.get(
+  "/get-website-detaisl",
+  authController.isAdmin,
+  userController.getWebsiteDetails
+);
 router.get("/request", authController.isAdmin, userController.getReqs);
 
 router.route("/:userId").get(userController.getSingleDoctor);

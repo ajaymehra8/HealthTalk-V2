@@ -1,7 +1,37 @@
 const User = require("../model/userModel");
-const storage = require("../config/firebase");
 const Reqs = require("../model/doctorModel");
 const Appoinment = require("../model/bookingModel");
+const Report = require("../model/reportModel");
+
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+const buildMonthlySeries = (rows, valueKey = "total") => {
+  const series = Array(12).fill(0);
+
+  rows.forEach((row) => {
+    const monthIndex = Number(row._id) - 1;
+
+    if (monthIndex >= 0 && monthIndex < 12) {
+      series[monthIndex] = Number(row?.[valueKey] ?? row?.total ?? 0);
+    }
+  });
+
+  return series;
+};
+
 exports.getAllDoctors = async (req, res) => {
   const keyword = req.query.search
     ? { name: { $regex: req.query.search, $options: "i" } }
@@ -175,18 +205,157 @@ exports.getReqs = async (req, res) => {
 
 exports.getWebsiteDetails = async (req, res) => {
   try {
-    const doctors = await User.find({ role: "doctor" });
-    const users = await User.find({ role: "user" });
-    const totalUsers = await User.find();
-    const appoinments = await Appoinment.find();
-    const doneAppoinments = await Appoinment.find({ payment: true });
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(Date.UTC(currentYear, 0, 1));
+    const startOfNextYear = new Date(Date.UTC(currentYear + 1, 0, 1));
+
+    const [
+      doctorCount,
+      userCount,
+      totalUsersCount,
+      appointmentCount,
+      paidAppointmentCount,
+      pendingApprovalCount,
+      reportCount,
+      adminCount,
+      monthlyAppointmentRows,
+      monthlyRevenueRows,
+      roleRows,
+    ] = await Promise.all([
+      User.countDocuments({ role: "doctor" }),
+      User.countDocuments({ role: "user" }),
+      User.countDocuments({}),
+      Appoinment.countDocuments({}),
+      Appoinment.countDocuments({ payment: true }),
+      Reqs.countDocuments({}),
+      Report.countDocuments({}),
+      User.countDocuments({ role: "admin" }),
+      Appoinment.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: startOfYear, $lt: startOfNextYear },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$createdAt" },
+            total: { $sum: 1 },
+            paid: {
+              $sum: {
+                $cond: [{ $eq: ["$payment", true] }, 1, 0],
+              },
+            },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+      Appoinment.aggregate([
+        {
+          $match: {
+            payment: true,
+            createdAt: { $gte: startOfYear, $lt: startOfNextYear },
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "doctor",
+            foreignField: "_id",
+            as: "doctor",
+          },
+        },
+        {
+          $unwind: {
+            path: "$doctor",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$createdAt" },
+            total: {
+              $sum: { $ifNull: ["$doctor.clinicFee", 0] },
+            },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+      User.aggregate([
+        {
+          $group: {
+            _id: "$role",
+            total: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    const roleMap = roleRows.reduce((acc, row) => {
+      acc[row._id || "unknown"] = row.total;
+      return acc;
+    }, {});
+
+    const monthlyAppointments = buildMonthlySeries(monthlyAppointmentRows, "total");
+    const monthlyPaidAppointments = buildMonthlySeries(monthlyAppointmentRows, "paid");
+    const monthlyRevenue = buildMonthlySeries(monthlyRevenueRows, "total");
+    const estimatedRevenue = monthlyRevenue.reduce((sum, value) => sum + value, 0);
+
     res.status(200).json({
       success: true,
-      doctors: doctors.length,
-      users: users.length,
-      totalUsers: totalUsers.length,
-      appoinments: appoinments.length,
-      payment: doneAppoinments?.length,
+      doctors: doctorCount,
+      users: userCount,
+      totalUsers: totalUsersCount,
+      appoinments: appointmentCount,
+      payment: paidAppointmentCount,
+      overview: {
+        doctors: doctorCount,
+        users: userCount,
+        totalUsers: totalUsersCount,
+        appoinments: appointmentCount,
+        payment: paidAppointmentCount,
+        estimatedRevenue,
+        pendingApprovals: pendingApprovalCount,
+        reports: reportCount,
+        admins: adminCount,
+      },
+      charts: {
+        months: MONTH_LABELS,
+        appointmentsTrend: {
+          labels: MONTH_LABELS,
+          datasets: [
+            {
+              label: "Appointments",
+              data: monthlyAppointments,
+            },
+            {
+              label: "Paid appointments",
+              data: monthlyPaidAppointments,
+            },
+          ],
+        },
+        revenueTrend: {
+          labels: MONTH_LABELS,
+          datasets: [
+            {
+              label: "Estimated revenue",
+              data: monthlyRevenue,
+            },
+          ],
+        },
+        roleBreakdown: {
+          labels: ["Users", "Doctors", "Admins"],
+          datasets: [
+            {
+              label: "Platform roles",
+              data: [
+                roleMap.user || 0,
+                roleMap.doctor || 0,
+                roleMap.admin || 0,
+              ],
+            },
+          ],
+        },
+      },
     });
   } catch (err) {
     console.log(err);

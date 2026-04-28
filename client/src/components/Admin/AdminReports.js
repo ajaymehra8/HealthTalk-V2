@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Box } from '@chakra-ui/react'
+import { Box, Text } from '@chakra-ui/react'
 import ReportCard from './reportComponent/ReportCard';
 import axios from 'axios';
 import { useAuthState } from '../../context/AuthProvider';
+import { FiFileText } from 'react-icons/fi';
+import { AdminEmptyState, AdminPageHero, AdminPanel } from './adminPageComponent/AdminLayout';
 const Reports = () => {
   const [reports,setReports]=useState([]);
   const {user}=useAuthState();
@@ -32,50 +34,65 @@ const Reports = () => {
   }, [fetchReports]);
 
   return (
-    <Box
-    display={"flex"}
-    flexDir={"column"}
-    alignItems={"start"}
-    justifyContent={"start"}
-    w={"clamp(320px,90%,1000px)"}
-    minH={"85vh"}
-    maxH={"85vh"}
-    gap={"30px"}
-overflowY={"auto"}
-    height={'auto'}
-          p={"2px 20px"}
-          pt={'10px'}
-          pb={'1vh'}
-    bg={"white"}
-    borderRadius={"10px"}
-    boxShadow={"1px 1px 10px 4px #686d77"}
-    sx={{
-      "@media(max-width:500px)":{
-        minHeight:"63vh",
-        maxHeight:"63vh"
-      },
-    }}
-    >
-      {reports.length > 0 && (
-        <h1 className="page-head" style={{ marginBottom: "5px",textDecoration:"underline" }}>
-          Doctor's reports
-        </h1>
-      )}
-      {!loading ? (
-        reports.length > 0 ? (
-          reports.map((report) => (
-            <ReportCard
-              report={report}
-              setReports={setReports}
-              reports={reports}
+    <Box w="full" maxW="1180px" mx="auto">
+      <AdminPageHero
+        badge="Reports"
+        title="User reports and moderation"
+        description="See doctor reports in the same glass-card language so moderation stays focused and easy to scan."
+        stats={[
+          {
+            label: "Reports",
+            value: reports.length,
+            detail: "Submitted moderation cases.",
+            icon: FiFileText,
+          },
+        ]}
+      >
+        <Box
+          w={{ base: "full", xl: "290px" }}
+          p={4}
+          borderRadius="22px"
+          bg="rgba(31, 58, 95, 0.04)"
+          border="1px solid rgba(31, 58, 95, 0.08)"
+        >
+          <Text fontSize="sm" color="var(--regular-color)">
+            Moderation focus
+          </Text>
+          <Text mt={1} fontSize="2xl" fontWeight="800" color="var(--heading-color)">
+            {reports.length}
+          </Text>
+          <Text fontSize="sm" color="var(--regular-color)" mt={2} lineHeight="1.6">
+            Each report is fetched live and can be reviewed or removed from this screen.
+          </Text>
+        </Box>
+      </AdminPageHero>
+
+      <AdminPanel minH={{ base: "52vh", md: "60vh" }} overflowY="auto">
+        {!loading ? (
+          reports.length > 0 ? (
+            <Box display="flex" flexDir="column" gap={4}>
+              {reports.map((report) => (
+                <ReportCard
+                  key={report?._id}
+                  report={report}
+                  setReports={setReports}
+                  reports={reports}
+                />
+              ))}
+            </Box>
+          ) : (
+            <AdminEmptyState
+              title="No reports to review"
+              description="When a patient files a report, it will appear here with the linked doctor profile."
             />
-          ))
+          )
         ) : (
-          <h1 className="no-item-text">No reports</h1>
-        )
-      ) : (
-        <h1 className="no-item-text">Loading...</h1>
-      )}
+          <AdminEmptyState
+            title="Loading reports"
+            description="Hold on while we fetch the latest moderation queue."
+          />
+        )}
+      </AdminPanel>
     </Box>
   )
 }
