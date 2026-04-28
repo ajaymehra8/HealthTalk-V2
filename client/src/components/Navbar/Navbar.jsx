@@ -28,6 +28,56 @@ const actionButtonStyles = {
   transition: "all 0.2s ease",
 };
 
+const navButtonStyles = {
+  h: "42px",
+  px: 4,
+  borderRadius: "full",
+  fontSize: "sm",
+  fontWeight: "800",
+  letterSpacing: "-0.01em",
+  transition: "all 0.2s ease",
+};
+
+const DesktopNavButton = ({
+  icon: Icon,
+  onClick,
+  children,
+  ...buttonProps
+}) => (
+  <Button
+    variant="ghost"
+    onClick={onClick}
+    leftIcon={Icon ? <Box as={Icon} /> : undefined}
+    color="var(--heading-color)"
+    _hover={{ bg: "rgba(31, 58, 95, 0.06)" }}
+    {...navButtonStyles}
+    {...buttonProps}
+  >
+    {children}
+  </Button>
+);
+
+const MobileNavButton = ({ icon: Icon, onClick, children, ...buttonProps }) => (
+  <Button
+    onClick={onClick}
+    leftIcon={Icon ? <Box as={Icon} /> : undefined}
+    justifyContent="center"
+    width="full"
+    bg="rgba(31, 58, 95, 0.04)"
+    color="var(--heading-color)"
+    border="1px solid rgba(31,58,95,0.08)"
+    _hover={{ bg: "rgba(31, 58, 95, 0.08)" }}
+    {...navButtonStyles}
+    {...buttonProps}
+  >
+    {children}
+  </Button>
+);
+
+const NAV_ITEMS = [
+  { label: "Find Doctors", action: "/doctors" },
+  { label: "Apply as Doctor", action: "/doctor/form" },
+];
 
 const PrimaryActionButton = ({ onClick, children, ...buttonProps }) => (
   <Button
@@ -110,6 +160,7 @@ const Navbar = () => {
   const location = useLocation();
   const { isOpen, onToggle, onClose } = useDisclosure();
   const authReturnTo = `${location.pathname}${location.search || ""}`;
+  const isUser = user?.role === "user";
 
   const goToLogin = () => {
     onClose();
@@ -124,6 +175,16 @@ const Navbar = () => {
   const goToProfile = () => {
     onClose();
     navigate("/my-profile");
+  };
+
+  const goToDoctors = () => {
+    onClose();
+    navigate("/doctors");
+  };
+
+  const goToDoctorForm = () => {
+    onClose();
+    navigate("/doctor/form");
   };
 
   return (
@@ -148,6 +209,14 @@ const Navbar = () => {
         >
           <HStack spacing={{ base: 3, lg: 8 }} minW={0} flex="1">
             <Logo />
+            {isUser ? (
+              <HStack display={{ base: "none", lg: "flex" }} spacing={2}>
+                <DesktopNavButton onClick={goToDoctors}>Find Doctors</DesktopNavButton>
+                <DesktopNavButton onClick={goToDoctorForm}>
+                  Apply as Doctor
+                </DesktopNavButton>
+              </HStack>
+            ) : null}
           </HStack>
 
           <HStack spacing={2.5} flexShrink={0}>
@@ -230,6 +299,29 @@ const Navbar = () => {
                   backdropFilter="blur(20px)"
                 >
                   <Stack spacing={4}>
+                    {isUser ? (
+                      <Stack spacing={3} alignItems="center">
+                        {NAV_ITEMS.map((item) => (
+                          <MobileNavButton
+                            key={item.label}
+                            onClick={() => {
+                              if (item.action === "/doctors") {
+                                goToDoctors();
+                                return;
+                              }
+                              if (item.action === "/doctor/form") {
+                                goToDoctorForm();
+                                return;
+                              }
+                              onClose();
+                            }}
+                          >
+                            {item.label}
+                          </MobileNavButton>
+                        ))}
+                      </Stack>
+                    ) : null}
+
                     {user ? (
                       <Button
                         onClick={goToProfile}
