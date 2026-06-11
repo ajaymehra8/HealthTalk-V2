@@ -15,7 +15,8 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { FiCalendar, FiCheckCircle, FiClock, FiTrash2, FiVideo } from "react-icons/fi";
+import { FiCalendar, FiCheckCircle, FiClock, FiMessageSquare, FiTrash2, FiVideo } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 import { useAuthState } from "../../../context/AuthProvider";
 import { MotionBox } from "../../Admin/adminPageComponent/AdminLayout";
 
@@ -59,6 +60,7 @@ const AppoinmentCard = ({ appoinment, setAppoinments, index = 0 }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [currentAppointment, setCurrentAppointment] = useState(appoinment);
   const toast = useToast();
+  const navigate = useNavigate();
   const { user } = useAuthState();
   const [acceptLoading, setAcceptLoading] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
@@ -459,6 +461,29 @@ const AppoinmentCard = ({ appoinment, setAppoinments, index = 0 }) => {
               >
                 {currentAppointment?.time ? "Scheduled" : "Set time"}
               </Button>
+
+              {currentAppointment?.payment ? (
+                <Button
+                  onClick={() =>
+                    navigate(`/my-profile/chat/${currentAppointment._id}`)
+                  }
+                  h="48px"
+                  px={5}
+                  borderRadius="16px"
+                  border="1px solid var(--auth-soft-accent-border)"
+                  bg="var(--auth-soft-accent-bg)"
+                  color="var(--primary-green-color)"
+                  fontSize="14px"
+                  fontWeight="800"
+                  leftIcon={<FiMessageSquare />}
+                  _hover={{
+                    bg: "rgba(41, 128, 78, 0.12)",
+                    transform: "translateY(-1px)",
+                  }}
+                >
+                  Message patient
+                </Button>
+              ) : null}
 
               {!currentAppointment?.time ? (
                 <Button

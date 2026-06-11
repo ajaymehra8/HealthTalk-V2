@@ -11,6 +11,7 @@ import Doctors from "./pages/Doctors";
 import { GuestRoute, ProtectedRoute } from "./hooks/useProtectedRoute";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Signup from "./components/Auth/Signup";
+import Chatbot from "./components/Chatbot/Chatbot";
 
 function App() {
   const { user } = useAuthState();
@@ -29,6 +30,7 @@ const GoogleAuthWrapperForSignUp=()=>{
   )
 }
   return (
+    <>
     <Routes>
       <Route
         path="/*"
@@ -95,6 +97,8 @@ const GoogleAuthWrapperForSignUp=()=>{
         }
       />
     </Routes>
+    <Chatbot />
+    </>
   );
 }
 

@@ -15,7 +15,7 @@ import axios from "axios";
 import moment from "moment";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FiArrowRight, FiCalendar, FiClock, FiCreditCard, FiMapPin } from "react-icons/fi";
+import { FiArrowRight, FiCalendar, FiClock, FiCreditCard, FiMapPin, FiMessageSquare } from "react-icons/fi";
 import { loadStripe } from "@stripe/stripe-js";
 import { useAuthState } from "../../../context/AuthProvider";
 
@@ -544,6 +544,28 @@ const AppoinmentCard = ({
               >
                 {isPaid ? "Payment done" : `Pay $${clinicFee || 0}`}
               </Button>
+
+              {isPaid && (
+                <Button
+                  onClick={() => navigate(`/my-profile/chat/${appoinment._id}`)}
+                  h="48px"
+                  borderRadius="16px"
+                  border="1px solid var(--auth-soft-accent-border)"
+                  bg="var(--auth-soft-accent-bg)"
+                  color="var(--primary-green-color)"
+                  fontSize="14px"
+                  fontWeight="800"
+                  leftIcon={<FiMessageSquare />}
+                  transition="transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease"
+                  _hover={{
+                    transform: "translateY(-1px)",
+                    bg: "rgba(41, 128, 78, 0.14)",
+                    boxShadow: "0 14px 24px rgba(41, 128, 78, 0.12)",
+                  }}
+                >
+                  Message & share documents
+                </Button>
+              )}
 
               {!isPaid && (
                 <Button

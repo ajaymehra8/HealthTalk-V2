@@ -31,8 +31,36 @@ const upload2 = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 });
 
+// Chat attachments: allow images, PDFs and common document/text types.
+const allowedChatMimeTypes = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/plain",
+];
+
+const multerFilter3 = (req, file, cb) => {
+  if (
+    file.mimetype.startsWith("image") ||
+    allowedChatMimeTypes.includes(file.mimetype)
+  ) {
+    cb(null, true);
+  } else {
+    cb(new Error("Unsupported file type for chat upload."), false);
+  }
+};
+
+const upload3 = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter3,
+  limits: { fileSize: 15 * 1024 * 1024 },
+});
+
 const uploadUserPhoto = upload.single("image");
 const uploadDoctorPdf = upload2.single("degree");
+const uploadChatFile = upload3.single("file");
 
 const resizeUserPhoto = async (req, res, next) => {
   if (!req.file) return next();
@@ -90,6 +118,7 @@ const uploadPdfToCloudinary = async (req, res, next) => {
 module.exports = {
   uploadUserPhoto,
   uploadDoctorPdf,
+  uploadChatFile,
   resizeUserPhoto,
   uploadPhotoToCloudinary,
   uploadPdfToCloudinary,
