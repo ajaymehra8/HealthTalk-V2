@@ -16,6 +16,7 @@ import WebInfo from "../Admin/adminPageComponent/WebInfo";
 import AdminReports from "../Admin/AdminReports";
 import AllDoctors from "../Admin/AllDoctors";
 import ReqProfCard from "../Admin/ReqProfCard";
+import Chat from "../Chat/Chat";
 
 const PROFILE_NAV_OFFSET = 66;
 
@@ -104,6 +105,7 @@ const UserInfo = () => {
                 <Route path="all-doctors" element={<AllDoctors />} />
 
                 <Route path="my-appoinment" element={<UserAppoinments />} />
+                <Route path="chat/:bookingId" element={<Chat />} />
                 <Route path="appoinments" element={<Appoinments />} />
                 <Route
                   path="my-reviews"
