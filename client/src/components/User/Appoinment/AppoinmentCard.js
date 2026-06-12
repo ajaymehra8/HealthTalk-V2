@@ -563,7 +563,7 @@ const AppoinmentCard = ({
                     boxShadow: "0 14px 24px rgba(41, 128, 78, 0.12)",
                   }}
                 >
-                  Message & share documents
+                  Message
                 </Button>
               )}
 
