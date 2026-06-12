@@ -112,7 +112,7 @@ const findDoctors = async ({ specialization, use_location }, location) => {
 exports.chat = async (req, res, next) => {
   try {
     const { messages = [], location = null } = req.body;
-
+console.log(messages,location);
     if (!process.env.GEMINI_API_KEY) {
       return res.status(503).json({
         success: false,

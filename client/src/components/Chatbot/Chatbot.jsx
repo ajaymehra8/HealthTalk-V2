@@ -12,20 +12,14 @@ import {
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {
-  FiMapPin,
-  FiMessageCircle,
-  FiSend,
-  FiStar,
-  FiX,
-} from "react-icons/fi";
+import { FiMapPin, FiMessageCircle, FiSend, FiStar, FiX } from "react-icons/fi";
 import { sendChat } from "../../Api/Assistant";
 
 const MotionBox = motion(Box);
 
 const GREETING = {
-  role: "assistant",
-  text: "Hi! I'm HealthBot 👋 I can help you find doctors, book appointments, or explain how HealthTalk works. Try \"find the nearest gynecologist\".",
+  role: "Assistant",
+  text: 'Hi! I\'m HealthBot 👋 I can help you find doctors, book appointments, or explain how HealthTalk works. Try "find the nearest gynecologist".',
   doctors: [],
 };
 
@@ -37,19 +31,32 @@ const DoctorCard = ({ doctor, onOpen }) => (
     borderRadius="14px"
     bg="white"
     border="1px solid rgba(31, 58, 95, 0.08)"
-    _hover={{ borderColor: "var(--primary-green-color)", transform: "translateY(-1px)" }}
+    _hover={{
+      borderColor: "var(--primary-green-color)",
+      transform: "translateY(-1px)",
+    }}
     transition="all 0.2s ease"
   >
     <HStack spacing={3} align="center">
       <Avatar size="sm" src={doctor.image} name={doctor.name} />
       <Box minW={0} flex="1">
-        <Text fontWeight="800" fontSize="sm" color="var(--heading-color)" noOfLines={1}>
+        <Text
+          fontWeight="800"
+          fontSize="sm"
+          color="var(--heading-color)"
+          noOfLines={1}
+        >
           {doctor.name}
         </Text>
         <Text fontSize="xs" color="var(--regular-color)" noOfLines={1}>
           {doctor.specialization}
         </Text>
-        <HStack spacing={3} mt={1} fontSize="11px" color="var(--secondary-gray-color)">
+        <HStack
+          spacing={3}
+          mt={1}
+          fontSize="11px"
+          color="var(--secondary-gray-color)"
+        >
           {doctor.clinicFee != null && (
             <Text fontWeight="700" color="var(--primary-green-color)">
               ${doctor.clinicFee}
@@ -76,7 +83,7 @@ const DoctorCard = ({ doctor, onOpen }) => (
 const Chatbot = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([GREETING]);
+  const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState(null);
@@ -100,7 +107,7 @@ const Chatbot = () => {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
           }),
-        () => {} // denied/unavailable — bot falls back to top-rated doctors
+        () => {}, // denied/unavailable — bot falls back to top-rated doctors
       );
     }
   }, [open, location]);
@@ -216,11 +223,35 @@ const Chatbot = () => {
             </HStack>
 
             {/* Messages */}
-            <Box ref={scrollRef} flex="1" overflowY="auto" px={3} py={4} bg="#f7fbfd">
+            <Box
+              ref={scrollRef}
+              flex="1"
+              overflowY="auto"
+              px={3}
+              py={4}
+              bg="#f7fbfd"
+            >
               <VStack align="stretch" spacing={3}>
+                <Box
+                  maxW="85%"
+                  px={3}
+                  py={2}
+                  borderRadius="14px"
+                  fontSize="sm"
+                  whiteSpace="pre-wrap"
+                  wordBreak="break-word"
+                  bg={"white"}
+                  color={"var(--heading-color)"}
+                  border={"1px solid rgba(31, 58, 95, 0.08)"}
+                  boxShadow={"none"}
+                >
+                  {GREETING.text}
+                </Box>
                 {messages.map((m, i) => (
                   <Box key={i}>
-                    <Flex justify={m.role === "user" ? "flex-end" : "flex-start"}>
+                    <Flex
+                      justify={m.role === "user" ? "flex-end" : "flex-start"}
+                    >
                       <Box
                         maxW="85%"
                         px={3}
@@ -234,9 +265,19 @@ const Chatbot = () => {
                             ? "linear-gradient(135deg, var(--primary-green-color), var(--secondary-green-color))"
                             : "white"
                         }
-                        color={m.role === "user" ? "white" : "var(--heading-color)"}
-                        border={m.role === "user" ? "none" : "1px solid rgba(31, 58, 95, 0.08)"}
-                        boxShadow={m.role === "user" ? "0 8px 18px rgba(41,128,78,0.18)" : "none"}
+                        color={
+                          m.role === "user" ? "white" : "var(--heading-color)"
+                        }
+                        border={
+                          m.role === "user"
+                            ? "none"
+                            : "1px solid rgba(31, 58, 95, 0.08)"
+                        }
+                        boxShadow={
+                          m.role === "user"
+                            ? "0 8px 18px rgba(41,128,78,0.18)"
+                            : "none"
+                        }
                       >
                         {m.text}
                       </Box>
@@ -245,7 +286,11 @@ const Chatbot = () => {
                     {m.doctors?.length > 0 && (
                       <VStack align="stretch" spacing={2} mt={2}>
                         {m.doctors.map((d) => (
-                          <DoctorCard key={d.id} doctor={d} onOpen={openDoctor} />
+                          <DoctorCard
+                            key={d.id}
+                            doctor={d}
+                            onOpen={openDoctor}
+                          />
                         ))}
                       </VStack>
                     )}
@@ -273,7 +318,11 @@ const Chatbot = () => {
             </Box>
 
             {/* Composer */}
-            <HStack spacing={2} p={3} borderTop="1px solid rgba(31, 58, 95, 0.08)">
+            <HStack
+              spacing={2}
+              p={3}
+              borderTop="1px solid rgba(31, 58, 95, 0.08)"
+            >
               <Input
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
